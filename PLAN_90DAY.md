@@ -138,10 +138,10 @@
 | ID | 任务 | Owner | 状态 |
 |---|---|---|---|
 | P0-1 | 完成 `30_products/contractor-fx-comparator` 正式产品结构、6 个计算路由 + 3 个联盟信任页（`/about/`、`/privacy/`、`/terms/`）、隐私安全 GA4 `dataLayer`、9 路由 `seo-preflight.mjs` 与 6 项 Playwright E2E 测试（含移动端 `375x812` 与零外部请求验证）及 `LAUNCH_CHECKLIST.md` | `[AI]` | `已完成（2026-11-12）` |
-| P0-2 | 注册 `contractorfx.com` 并接入 Cloudflare，启用 Cloudflare Email Routing 转发 `hello@contractorfx.com`，运行 `npm run cf:deploy` 完成生产部署并绑定自定义域名（预估耗时 20 分钟；详见 `LAUNCH_CHECKLIST.md`） | `[人工]` | `待办` |
-| P0-3 | 配置 Google Search Console（`sc-domain:contractorfx.com`）、Bing Webmaster Tools（含 IndexNow）与 GA4 站点属性，提交 `https://contractorfx.com/sitemap-index.xml`，并将公开 ID 登记至 `../../40_shared/analytics-sites.yaml` 的 `contractorfx` 项（预估耗时 20 分钟） | `[人工]` | `待办` |
-| P0-4 | 基于 `P0-3` 提供的公开统计配置，跑通 `npm run ga4:report`、`npm run gsc:report`、`npm run bing:report` 首轮连通性检查并记录新站零基线（依赖 P0-2、P0-3） | `[AI]` | `待办` |
-| P0-5 | 复核 9 个路由的 `<title>`、`<meta name="description">`、`og:image` 与 `<h1>` 关键词覆盖，上线后锁定 28 天观察窗口（至 2026-12-10 前不重复改标题） | `[协作]` | `待办` |
+| P0-2 | 注册 `contractorfx.com` 并接入 Cloudflare，启用 Cloudflare Email Routing 转发 `hello@contractorfx.com` 与 `privacy@contractorfx.com`，关闭 `workers_dev` 子域并完成生产部署绑定自定义域名 | `[协作]` | `已完成（2026-11-12）` |
+| P0-3 | 配置 Google Search Console（`sc-domain:contractorfx.com`）、Bing Webmaster Tools（含 IndexNow）与 GA4 站点属性（`564010676` / `G-BMWC0P9PW2` + 自定义维度/指标），提交 `sitemap-index.xml`，并登记至 `../../40_shared/analytics-sites.yaml` | `[协作]` | `已完成（2026-11-12）` |
+| P0-4 | 基于 `P0-3` 提供的公开统计配置，跑通 `npm run ga4:report`、`npm run gsc:report`、`npm run bing:report` 首轮连通性检查并记录新站零基线（依赖 P0-2、P0-3） | `[AI]` | `已完成（2026-11-12）` |
+| P0-5 | 复核 9 个路由的 `<title>`、`<meta name="description">`、`og:image` 与 `<h1>` 关键词覆盖，上线后锁定 28 天观察窗口（至 2026-12-10 前不重复改标题） | `[AI]` | `已完成（2026-11-12）` |
 | P0-6 | 在 `NOW.md` 记录迁入 `30_products/` 正式仓、90 天试验窗口与首周等待人工清单 | `[AI]` | `已完成（2026-11-12）` |
 
 **Phase 0 验收**：本地 `npm run verify:all` 全绿；主假设一句话锁死；线上 `https://contractorfx.com` 部署与搜索控制台提交完成（或未完成项已明确列在等待人工清单中）。

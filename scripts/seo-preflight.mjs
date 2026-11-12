@@ -394,12 +394,27 @@ export function inspectDist(distDir, siteOrigin = SITE_ORIGIN) {
 		}
 	}
 
-	// Verify preview domain noindex header in _headers
+	// Verify security headers in _headers and workers_dev suppression in wrangler.jsonc
 	const headersPath = path.join(distDir, '_headers');
 	if (isExistingFile(headersPath)) {
 		const headersContent = readFileSync(headersPath, 'utf8');
-		if (!headersContent.includes('X-Robots-Tag: noindex')) {
-			errors.push('dist/_headers missing required preview domain rule "X-Robots-Tag: noindex"');
+		if (/^https?:\/\//m.test(headersContent)) {
+			errors.push('dist/_headers: host-prefixed https:// rules are ignored by Workers Static Assets; use wrangler.jsonc workers_dev: false instead');
+		}
+		if (!headersContent.includes('Content-Security-Policy:')) {
+			errors.push('dist/_headers missing required Content-Security-Policy header');
+		}
+		if (!headersContent.includes('Strict-Transport-Security:')) {
+			errors.push('dist/_headers missing required Strict-Transport-Security header');
+		}
+	}
+
+	const wranglerPath = path.resolve(distDir, '..', 'wrangler.jsonc');
+	if (isExistingFile(wranglerPath)) {
+		const rawWrangler = readFileSync(wranglerPath, 'utf8').replace(/^\s*\/\/.*$/gm, '');
+		const wranglerCfg = JSON.parse(rawWrangler);
+		if (wranglerCfg.workers_dev !== false || wranglerCfg.preview_urls !== false) {
+			errors.push('wrangler.jsonc: workers_dev and preview_urls must both be false once custom domain is active');
 		}
 	}
 
