@@ -2,6 +2,15 @@
 
 This runbook covers every manual (`[人工]`) and automated verification step required to take **ContractorFX** (`https://contractorfx.com`) live from `/Users/dake/Projects/aiapp/30_products/contractor-fx-comparator/` and onboard B2B partner programs.
 
+## Live launch status (2026-11-12)
+
+- Production: `https://contractorfx.com/`, Cloudflare Worker `contractor-fx-comparator`, version `e4a15f92-55da-4268-9cd7-c01ab4abe08a`; `www` redirects to the apex with HTTP `301`.
+- GA4: property `564010676`, web stream `16325680671`, measurement ID `G-BMWC0P9PW2`. Retention is 14 months; site search and form interaction enhanced measurement are disabled. `payout_calc_export` is a key event counted once per event.
+- Google Search Console: `sc-domain:contractorfx.com` verified by DNS; both `liqi199315@gmail.com` and `build-android@charged-sector-382503.iam.gserviceaccount.com` are verified owners. Sitemap `https://contractorfx.com/sitemap-index.xml` submitted with HTTP `204`, read back with HTTP `200`, pending processing.
+- IndexNow: submitted 9 URLs, HTTP `202`.
+- Production HTML contains the measurement ID and returned HTTP `200` for Googlebot, AdsBot-Google, Bingbot, OAI-SearchBot, ChatGPT-User, and PerplexityBot. Build, launch preflight, and SEO check passed.
+- Still to verify: domain email delivery, Bing Webmaster Tools registration, Google sitemap processing, live analytics data, and shared reporting registration.
+
 ## 1. Run the local pre-launch verification gate
 
 Before purchasing DNS records or deploying to Cloudflare, run the full local gate from `/Users/dake/Projects/aiapp/30_products/contractor-fx-comparator`:

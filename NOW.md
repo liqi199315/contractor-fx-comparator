@@ -3,10 +3,13 @@
 ## 当前阶段（2026-11-12）
 
 - **项目路径**：`/Users/dake/Projects/aiapp/30_products/contractor-fx-comparator/`（已迁入 `30_products/` 正式产品仓）
-- **目标域名**：`https://contractorfx.com`（商业联系邮箱 `hello@contractorfx.com`；本地生产级预发布就绪，等待人工注册域名与首次线上部署）
+- **线上站点**：`https://contractorfx.com`，Cloudflare Worker 已部署，版本 `e4a15f92-55da-4268-9cd7-c01ab4abe08a`；商业联系邮箱 `hello@contractorfx.com` 的收信能力尚待验证。
 - **90 天试验窗口**：`2026-11-12` 至 `2027-02-10`（详见 `PLAN_90DAY.md`）
 - **主关键词**：`wise vs payoneer calculator`
-- **当前流量与转化基线**：`盲`（待站长完成 `contractorfx.com` 绑定及 GSC / Bing / GA4 注册）
+- **当前流量与转化基线**：`盲`（GA4 与 GSC 已配置，流量数据与 Bing Webmaster Tools 尚待验证）。
+- **GA4**：属性 ID `564010676`，数据流 ID `16325680671`，Measurement ID `G-BMWC0P9PW2`；`payout_calc_export` 已设为关键事件，保留期 14 个月，站内搜索和表单增强衡量已关闭。
+- **GSC**：`sc-domain:contractorfx.com` DNS 验证成功，服务账号和 `liqi199315@gmail.com` 均为所有者；`https://contractorfx.com/sitemap-index.xml` 已提交，Google 返回待处理。
+- **IndexNow**：已提交 9 个 URL，HTTP `202`。
 
 ## 已就绪资产清单
 
@@ -31,15 +34,17 @@
 
 ## 等待站长完成的清单（`[人工]`）
 
-1. **P0-2（预估 20 分钟）**：注册 `contractorfx.com` 并接入 Cloudflare，使用 `cf-zone-bootstrap.mjs` 或控制台配置 `hello@contractorfx.com` 邮件转发，运行 `npm run cf:deploy` 发布静态站点并绑定自定义域名（详见 `LAUNCH_CHECKLIST.md` 第 2 至 3 节）。
-2. **P0-3（预估 20 分钟）**：在 Google Search Console、Bing Webmaster Tools 与 GA4 创建 `contractorfx.com` 属性，提交 `https://contractorfx.com/sitemap-index.xml` 与 IndexNow 密钥，并将公开属性 ID 写入 `../../40_shared/analytics-sites.yaml` 的 `contractorfx` 条目（详见 `LAUNCH_CHECKLIST.md` 第 4 至 5 节）。
+1. **P0-2**：验证 `hello@contractorfx.com` 邮件转发与收信；站点部署及域名绑定已完成。
+2. **P0-3**：配置 Bing Webmaster Tools 并核对 GSC 站点地图处理结果；共享统计登记未在本次任务中更改。
 3. **P2-1（上线收录后执行，预估 30 分钟）**：凭已上线的 `/about/`、`/privacy/`、`/terms/` 合规页面与 `hello@contractorfx.com` 域名邮箱，使用 `LAUNCH_KIT.md` 第 5 节准备好的陈词提交 Wise Partnerize 与 Deel Affiliate 官方伙伴申请（详见 `LAUNCH_CHECKLIST.md` 第 6 节）。
 
 ## 下一步第一动作
 
-- 运行 `npm run verify:all` 确认 27 项单元测试、静态构建、CLI 打包、11 项静态产物 SEO 门禁与 6 项 Playwright E2E 验证全绿，交由站长 dake 按 `LAUNCH_CHECKLIST.md` 执行 `P0-2` 与 `P0-3`。
+- 核对 GSC 站点地图处理结果，验证域名邮箱收信并配置 Bing Webmaster Tools；查看真实流量和 GA4 事件数据。
 
 ## 行动记录
+
+- `2026-11-12` `[AI]`：部署生产 Worker，自定义域名生效；构建、发布预检及 SEO 检查通过，六种搜索机器人线上 HTTP `200`，www HTTP `301`。完成 GA4 和 GSC 配置、提交站点地图和 IndexNow；GSC 处理结果及流量尚待核对。
 
 - `2026-11-12` `[AI]`：完成 MVP 核心计算引擎、6 个工具路由、基础预检脚本与 4 条 Playwright 测试初始化。
 - `2026-11-12` `[AI]`：完成正式化升级（`30_products/contractor-fx-comparator` + `https://contractorfx.com`），新增 Wise/Deel 联盟审核级信任页（`/about/`、`/privacy/`、`/terms/`），升级 `scripts/seo-preflight.mjs` 覆盖 9 路由 + 8 静态产物 + JSON-LD + `og:image`，扩充 `tests/e2e/comparator.spec.ts` 至 6 条用例，并编写 `LAUNCH_CHECKLIST.md`。
