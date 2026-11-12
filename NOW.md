@@ -3,13 +3,16 @@
 ## 当前阶段（2026-11-12）
 
 - **项目路径**：`/Users/dake/Projects/aiapp/30_products/contractor-fx-comparator/`（已迁入 `30_products/` 正式产品仓）
-- **线上站点**：`https://contractorfx.com`，Cloudflare Worker 已部署，版本 `e4a15f92-55da-4268-9cd7-c01ab4abe08a`；商业联系邮箱 `hello@contractorfx.com` 的收信能力尚待验证。
+- **线上站点**：`https://contractorfx.com`，Cloudflare Worker 已部署，版本 `e4a15f92-55da-4268-9cd7-c01ab4abe08a`。Zone `102de3b1af4b76feef4793ac430604f9`（`contractorfx.com`）状态 `active`。Email Routing 为 `enabled: true`、`status: ready`：`hello@contractorfx.com` 与 `privacy@contractorfx.com` 转发到 `liqi199315@gmail.com`，MX、SPF、DKIM 已锁定，并有 `_dmarc` TXT。
 - **90 天试验窗口**：`2026-11-12` 至 `2027-02-10`（详见 `PLAN_90DAY.md`）
 - **主关键词**：`wise vs payoneer calculator`
-- **当前流量与转化基线**：`盲`（GA4 与 GSC 已配置，流量数据与 Bing Webmaster Tools 尚待验证）。
+- **当前流量与转化基线**：统计通道已接通。`ga4-report.mjs`、`gsc-report.mjs`、`bing-report.mjs` 与 `analytics-registry.test.mjs` 均退出码 `0`。点击与事件的具体数字不写进本文，以当次报告为准。
 - **GA4**：属性 ID `564010676`，数据流 ID `16325680671`，Measurement ID `G-BMWC0P9PW2`；`payout_calc_export` 已设为关键事件，保留期 14 个月，站内搜索和表单增强衡量已关闭。
 - **GSC**：`sc-domain:contractorfx.com` DNS 验证成功，服务账号和 `liqi199315@gmail.com` 均为所有者；`https://contractorfx.com/sitemap-index.xml` 已提交，Google 返回待处理。
+- **Bing Webmaster Tools**：`IsVerified: true`（Cloudflare 未代理的 `verify.bing.com` CNAME）。站点地图 `https://contractorfx.com/sitemap-index.xml` 已通过 `SubmitFeed` 提交。
+- **共享统计登记**：`../../40_shared/analytics-sites.yaml` 键名 `contractorfx`，`ga4_property_id: "564010676"`，Measurement ID `G-BMWC0P9PW2`，`sc-domain:contractorfx.com`，站点 `https://contractorfx.com/`。
 - **IndexNow**：已提交 9 个 URL，HTTP `202`。
+- **代码仓库**：私有仓库 `https://github.com/liqi199315/contractor-fx-comparator`。
 
 ## 已就绪资产清单
 
@@ -34,16 +37,16 @@
 
 ## 等待站长完成的清单（`[人工]`）
 
-1. **P0-2**：验证 `hello@contractorfx.com` 邮件转发与收信；站点部署及域名绑定已完成。
-2. **P0-3**：配置 Bing Webmaster Tools 并核对 GSC 站点地图处理结果；共享统计登记未在本次任务中更改。
-3. **P2-1（上线收录后执行，预估 30 分钟）**：凭已上线的 `/about/`、`/privacy/`、`/terms/` 合规页面与 `hello@contractorfx.com` 域名邮箱，使用 `LAUNCH_KIT.md` 第 5 节准备好的陈词提交 Wise Partnerize 与 Deel Affiliate 官方伙伴申请（详见 `LAUNCH_CHECKLIST.md` 第 6 节）。
+1. **社区冷启动**：按 `LAUNCH_KIT.md` 用站长账号发布 Show HN、Reddit、X、Product Hunt。不要代发。
+2. **P2-1（预估 30 分钟）**：凭已上线的 `/about/`、`/privacy/`、`/terms/` 与 `hello@contractorfx.com`，使用 `LAUNCH_KIT.md` 第 5 节陈词提交 Wise Partnerize 与 Deel Affiliate 官方伙伴申请（详见 `LAUNCH_CHECKLIST.md` 第 6 节）。
 
 ## 下一步第一动作
 
-- 核对 GSC 站点地图处理结果，验证域名邮箱收信并配置 Bing Webmaster Tools；查看真实流量和 GA4 事件数据。
+- 站长按 `LAUNCH_KIT.md` 发布 Show HN、Reddit、X、Product Hunt，并提交 Wise Partnerize 与 Deel Affiliate 申请。GSC 站点地图处理结果仍为待处理，不阻塞这两项。
 
 ## 行动记录
 
+- `2026-11-12` `[AI]`：核对 Email Routing（Zone `102de3b1af4b76feef4793ac430604f9`，`enabled: true`，`status: ready`，`hello@contractorfx.com` 与 `privacy@contractorfx.com` 转发至 `liqi199315@gmail.com`，MX、SPF、DKIM 锁定，`_dmarc` TXT）、Bing Webmaster Tools（`IsVerified: true`，`SubmitFeed` 已提交 `https://contractorfx.com/sitemap-index.xml`）与共享统计登记（`analytics-sites.yaml` 的 `contractorfx`）。`ga4-report.mjs`、`gsc-report.mjs`、`bing-report.mjs`、`analytics-registry.test.mjs` 退出码均为 `0`。剩余人工项为社区发布与联盟申请。
 - `2026-11-12` `[AI]`：部署生产 Worker，自定义域名生效；构建、发布预检及 SEO 检查通过，六种搜索机器人线上 HTTP `200`，www HTTP `301`。完成 GA4 和 GSC 配置、提交站点地图和 IndexNow；GSC 处理结果及流量尚待核对。
 
 - `2026-11-12` `[AI]`：完成 MVP 核心计算引擎、6 个工具路由、基础预检脚本与 4 条 Playwright 测试初始化。
