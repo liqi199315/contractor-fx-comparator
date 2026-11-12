@@ -1,0 +1,208 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FxComparatorWorkbench from '../components/FxComparatorWorkbench.astro';
+import { comparePayoutProviders } from '../lib/fx-engine';
+import { ROUTE_CARD_META, ROUTE_PRESETS } from '../lib/route-presets';
+import type { FxRoutePreset } from '../lib/types';
+
+export function getStaticPaths() {
+	return ROUTE_PRESETS.filter((item) => item.slug !== '').map((item) => ({
+		params: { preset: item.slug },
+		props: { preset: item },
+	}));
+}
+
+interface Props {
+	preset: FxRoutePreset;
+}
+
+const { preset } = Astro.props;
+
+const relatedRoutes = ROUTE_PRESETS.filter((item) => item.path !== preset.path);
+const scenarioSummary = comparePayoutProviders(preset.defaultInput);
+const bestQuote = scenarioSummary.quotes[0]!;
+const worstQuote = scenarioSummary.quotes[scenarioSummary.quotes.length - 1]!;
+const bestBps = Math.round(bestQuote.effectiveFeePct * 100);
+const worstBps = Math.round(worstQuote.effectiveFeePct * 100);
+
+function fmtMoney(value: number): string {
+	return value.toLocaleString('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	});
+}
+---
+
+<BaseLayout
+	title={preset.seoTitle}
+	description={preset.metaDescription}
+	canonicalPath={preset.path}
+	faqs={preset.faqs}
+>
+	<div class="space-y-10 min-w-0">
+		<FxComparatorWorkbench preset={preset} />
+
+		<section class="fintech-card rounded-2xl p-6 sm:p-8 space-y-6">
+			<div class="space-y-2">
+				<p class="text-xs font-bold uppercase tracking-wider text-emerald-800">
+					Corridor Formula Breakdown ({preset.defaultInput.billingCurrency} -&gt; {preset.defaultInput.payoutCurrency})
+				</p>
+				<h2 class="text-xl font-bold text-slate-900 sm:text-2xl">
+					How Hidden FX Spreads Work
+				</h2>
+				<p class="max-w-3xl text-sm leading-relaxed text-slate-600 tabular-nums">
+					On a {fmtMoney(preset.defaultInput.invoiceAmount)} {preset.defaultInput.billingCurrency} payout into {preset.defaultInput.payoutCurrency} (reference mid-rate 1 {preset.defaultInput.billingCurrency} = {scenarioSummary.midMarketRate} {preset.defaultInput.payoutCurrency}), headline transfer fees tell less than half the story. Total fee drag combines three separate cost layers.
+				</p>
+			</div>
+
+			<div class="grid gap-4 md:grid-cols-3">
+				<div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 space-y-2">
+					<p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+						Layer 1. Exchange Rate Markup
+					</p>
+					<p class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs font-semibold text-slate-900">
+						FX Loss $ = Gross USD x (Spread bps / 10,000)
+					</p>
+					<p class="text-xs leading-relaxed text-slate-600 tabular-nums">
+						{bestQuote.providerName} prices conversion at {Math.round(bestQuote.fxSpreadPct * 100)} bps (${fmtMoney(bestQuote.fxLossUsd)} FX loss), whereas {worstQuote.providerName} embeds {Math.round(worstQuote.fxSpreadPct * 100)} bps (${fmtMoney(worstQuote.fxLossUsd)} FX loss).
+					</p>
+				</div>
+
+				<div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 space-y-2">
+					<p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+						Layer 2. SaaS Seat &amp; Rail Charges
+					</p>
+					<p class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs font-semibold text-slate-900">
+						Fixed Bite $ = Prorated Seat $ + Rail Fee $
+					</p>
+					<p class="text-xs leading-relaxed text-slate-600 tabular-nums">
+						Monthly contractor subscriptions ($29 to $49 per seat) and wire initiation fees stack on top of FX markups across {preset.defaultInput.contractorCount} active {preset.defaultInput.contractorCount === 1 ? 'contractor' : 'contractors'}.
+					</p>
+				</div>
+
+				<div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 space-y-2">
+					<p class="text-xs font-bold uppercase tracking-wide text-slate-500">
+						Layer 3. Annualized Corridor Delta
+					</p>
+					<p class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs font-semibold text-slate-900">
+						12-Mo Savings = (Worst - Best Drag) x 12
+					</p>
+					<p class="text-xs leading-relaxed text-slate-600 tabular-nums">
+						Routing this corridor via {bestQuote.providerName} ({bestBps} bps total) instead of {worstQuote.providerName} ({worstBps} bps total) retains ${fmtMoney(scenarioSummary.annualSavingsBestVsWorstUsd)} per year.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<section class="fintech-card rounded-2xl p-6 sm:p-8 space-y-6">
+			<div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+				<div class="space-y-1">
+					<p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+						Cross-Corridor Benchmarks
+					</p>
+					<h2 class="text-xl font-bold text-slate-900 sm:text-2xl">
+						Popular Payout Corridors &amp; Platform Comparisons
+					</h2>
+				</div>
+				<p class="text-xs text-slate-600">
+					Switch directly to another contractor corridor or audit your full team CSV
+				</p>
+			</div>
+
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				{
+					relatedRoutes.map((item) => {
+						const meta = ROUTE_CARD_META[item.path];
+						return (
+							<a
+								href={item.path}
+								class="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-slate-400 hover:bg-slate-50/80"
+							>
+								<div class="space-y-2.5">
+									<div class="flex flex-wrap items-center justify-between gap-2">
+										<span class="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-900">
+											{meta?.audienceTag ?? 'Benchmark'}
+										</span>
+										<span class="rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700 tabular-nums">
+											{meta?.corridorBadge ?? `${item.defaultInput.billingCurrency} -> ${item.defaultInput.payoutCurrency}`}
+										</span>
+									</div>
+									<h3 class="text-base font-bold text-slate-900 group-hover:text-emerald-800">
+										{item.navLabel}
+									</h3>
+									<p class="text-xs leading-relaxed text-slate-600">
+										{meta?.comparisonFocus ?? item.heroSummary}
+									</p>
+								</div>
+								<div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs font-semibold text-slate-800 tabular-nums">
+									<span>
+										${fmtMoney(item.defaultInput.invoiceAmount)} {item.defaultInput.billingCurrency} ({item.defaultInput.contractorCount} {item.defaultInput.contractorCount === 1 ? 'seat' : 'seats'})
+									</span>
+									<span class="text-emerald-700 group-hover:translate-x-0.5 transition-transform">
+										Compare -&gt;
+									</span>
+								</div>
+							</a>
+						);
+					})
+				}
+			</div>
+		</section>
+
+		<section class="grid gap-6 lg:grid-cols-2">
+			<div class="fintech-card rounded-2xl p-6 space-y-4">
+				<h2 class="text-lg font-bold text-slate-900">
+					Corridor Rate and Fee Methodology
+				</h2>
+				<ul class="space-y-2.5 text-sm leading-relaxed text-slate-700 list-disc pl-5">
+					{preset.methodologyNotes.map((note) => <li>{note}</li>)}
+				</ul>
+				<p class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+					Reference mid-market rates and published schedule estimates as of Nov 2026; verify live checkout quotes before initiating transfers.
+				</p>
+			</div>
+
+			<div class="fintech-card rounded-2xl p-6 space-y-4">
+				<h2 class="text-lg font-bold text-slate-900">
+					Audit Verification &amp; Privacy Standards
+				</h2>
+				<dl class="space-y-3 text-sm">
+					<div class="rounded-lg border border-slate-200/80 bg-slate-50/60 p-3.5 space-y-1">
+						<dt class="font-semibold text-slate-900">Published Schedule Provenance</dt>
+						<dd class="text-xs leading-relaxed text-slate-600">
+							All fee drag projections reference November 2026 public pricing schedules across Wise Business, Payoneer, Deel, Remote, and traditional SWIFT wire desks.
+						</dd>
+					</div>
+					<div class="rounded-lg border border-slate-200/80 bg-slate-50/60 p-3.5 space-y-1">
+						<dt class="font-semibold text-slate-900">Browser-Local Confidentiality</dt>
+						<dd class="text-xs leading-relaxed text-slate-600">
+							Calculations and batch CSV parsing execute locally in your browser. Zero invoice amounts, contractor names, or roster files are uploaded to external servers.
+						</dd>
+					</div>
+					<div class="rounded-lg border border-slate-200/80 bg-slate-50/60 p-3.5 space-y-1">
+						<dt class="font-semibold text-slate-900">Live Checkout Spot Check</dt>
+						<dd class="text-xs leading-relaxed text-slate-600">
+							Enter your live treasury desk or Reuters interbank spot quote into the Custom Mid-Rate Override field above to reconcile pre-settlement payouts to the cent.
+						</dd>
+					</div>
+				</dl>
+			</div>
+		</section>
+
+		<section class="fintech-card rounded-2xl p-6 sm:p-8 space-y-6">
+			<h2 class="text-xl font-bold text-slate-900">
+				Frequently Asked Questions
+			</h2>
+			<dl class="divide-y divide-slate-200">
+				{
+					preset.faqs.map((faq) => (
+						<div class="py-4 first:pt-0 last:pb-0 space-y-1.5">
+							<dt class="text-base font-semibold text-slate-900">{faq.question}</dt>
+							<dd class="text-sm leading-relaxed text-slate-600">{faq.answer}</dd>
+						</div>
+					))
+				}
+			</dl>
+		</section>
+	</div>
+</BaseLayout>

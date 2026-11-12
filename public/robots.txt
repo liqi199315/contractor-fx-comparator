@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://contractorfx.com/sitemap-index.xml

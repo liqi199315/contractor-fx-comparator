@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none" role="img" aria-labelledby="og-title og-desc">
+  <title id="og-title">ContractorFX Global Contractor Payout and FX Spread Benchmark</title>
+  <desc id="og-desc">Compare Wise, Payoneer, Deel, Remote, and SWIFT bank wire fee drag locally in your browser with zero payroll uploads.</desc>
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#020617" />
+      <stop offset="55%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#06281e" />
+    </linearGradient>
+    <linearGradient id="card-grad" x1="650" y1="90" x2="1130" y2="540" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.92" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.96" />
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#334155" stroke-width="1" stroke-opacity="0.28" />
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg-grad)" />
+  <rect width="1200" height="630" fill="url(#grid)" />
+  <circle cx="1040" cy="110" r="220" fill="#10b981" fill-opacity="0.10" />
+  <circle cx="180" cy="540" r="240" fill="#0ea5e9" fill-opacity="0.08" />
+
+  <g transform="translate(72, 74)">
+    <rect width="56" height="56" rx="14" fill="#0f172a" stroke="#334155" stroke-width="2" />
+    <path d="M14 21h23l-5-5m5 5l-5 5" stroke="#34d399" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M42 35H19l5-5m-5 5l5 5" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="72" y="30" fill="#f8fafc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="-0.5">ContractorFX</text>
+    <text x="72" y="50" fill="#94a3b8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="500">contractorfx.com</text>
+  </g>
+
+  <g transform="translate(72, 168)">
+    <rect width="276" height="34" rx="17" fill="#064e3b" fill-opacity="0.65" stroke="#10b981" stroke-opacity="0.55" stroke-width="1.5" />
+    <circle cx="20" cy="17" r="5" fill="#34d399" />
+    <text x="34" y="22" fill="#a7f3d0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="0.3">100% LOCAL PAYROLL PRIVACY</text>
+  </g>
+
+  <g transform="translate(72, 256)">
+    <text x="0" y="0" fill="#f8fafc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="46" font-weight="800" letter-spacing="-1.1">Contractor Payout</text>
+    <text x="0" y="56" fill="#f8fafc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="46" font-weight="800" letter-spacing="-1.1">&amp; FX Spread</text>
+    <text x="0" y="112" fill="#34d399" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="46" font-weight="800" letter-spacing="-1.1">Comparator</text>
+
+    <text x="0" y="164" fill="#cbd5e1" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="19" font-weight="400">Model SaaS seat overhead, ACH or wire fees,</text>
+    <text x="0" y="192" fill="#cbd5e1" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="19" font-weight="400">and retail FX markups across 8 payout currencies.</text>
+
+    <text x="0" y="254" fill="#94a3b8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="600">USD / EUR / GBP  to  INR / PHP / BRL / MXN / EUR / GBP / CNY / CAD</text>
+  </g>
+
+  <g transform="translate(620, 84)">
+    <rect width="508" height="462" rx="22" fill="url(#card-grad)" stroke="#334155" stroke-width="1.5" />
+    <text x="32" y="46" fill="#94a3b8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="1.1">SAMPLE CORRIDOR BENCHMARK: $3,500 USD TO INR</text>
+    <line x1="32" y1="64" x2="476" y2="64" stroke="#334155" stroke-width="1" />
+
+    <g transform="translate(32, 86)">
+      <rect width="444" height="64" rx="12" fill="#064e3b" fill-opacity="0.45" stroke="#10b981" stroke-width="1.5" />
+      <text x="18" y="27" fill="#ecfdf5" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700">Wise Business</text>
+      <text x="18" y="47" fill="#6ee7b7" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600">Mid-market rate + transparent corridor fee</text>
+      <rect x="336" y="17" width="90" height="30" rx="8" fill="#10b981" fill-opacity="0.22" />
+      <text x="381" y="37" text-anchor="middle" fill="#34d399" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700">LOWEST DRAG</text>
+    </g>
+
+    <g transform="translate(32, 164)">
+      <rect width="444" height="56" rx="12" fill="#0f172a" fill-opacity="0.7" stroke="#334155" stroke-width="1" />
+      <text x="18" y="25" fill="#e2e8f0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">Payoneer</text>
+      <text x="18" y="43" fill="#94a3b8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12">Zero seat fee + conversion margin</text>
+      <rect x="292" y="22" width="132" height="12" rx="6" fill="#38bdf8" fill-opacity="0.45" />
+    </g>
+
+    <g transform="translate(32, 232)">
+      <rect width="444" height="56" rx="12" fill="#0f172a" fill-opacity="0.7" stroke="#334155" stroke-width="1" />
+      <text x="18" y="25" fill="#e2e8f0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">Remote</text>
+      <text x="18" y="43" fill="#94a3b8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12">$29/mo contractor seat + FX spread</text>
+      <rect x="272" y="22" width="152" height="12" rx="6" fill="#fbbf24" fill-opacity="0.55" />
+    </g>
+
+    <g transform="translate(32, 300)">
+      <rect width="444" height="56" rx="12" fill="#0f172a" fill-opacity="0.7" stroke="#334155" stroke-width="1" />
+      <text x="18" y="25" fill="#e2e8f0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">Deel</text>
+      <text x="18" y="43" fill="#94a3b8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12">$49/mo contractor seat + withdrawal spread</text>
+      <rect x="248" y="22" width="176" height="12" rx="6" fill="#f97316" fill-opacity="0.6" />
+    </g>
+
+    <g transform="translate(32, 368)">
+      <rect width="444" height="56" rx="12" fill="#0f172a" fill-opacity="0.7" stroke="#334155" stroke-width="1" />
+      <text x="18" y="25" fill="#e2e8f0" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">SWIFT Bank Wire</text>
+      <text x="18" y="43" fill="#94a3b8" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12">Correspondent wire fees + retail desk FX</text>
+      <rect x="224" y="22" width="200" height="12" rx="6" fill="#f43f5e" fill-opacity="0.65" />
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,139 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+	title="About ContractorFX and Tariff Modeling Methodology"
+	description="Learn how ContractorFX models Wise Business, Payoneer, Deel, Remote, and SWIFT contractor payout fees, FX spreads, and quarterly schedule audits."
+	canonicalPath="/about/"
+>
+	<article class="mx-auto max-w-4xl space-y-8">
+		<header class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs space-y-3">
+			<div class="inline-flex flex-wrap items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-900">
+				<span>Editorial &amp; Tariff Methodology</span>
+				<span aria-hidden="true">/</span>
+				<span>Q4 2026 Schedule Audit</span>
+			</div>
+			<h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+				Editorial Policy and Tariff Modeling Methodology
+			</h1>
+			<p class="text-sm leading-relaxed text-slate-600 sm:text-base">
+				ContractorFX (<a href="/" class="font-medium text-slate-900 underline hover:text-emerald-800">contractorfx.com</a>) is an independent cost-accounting workbench built for finance controllers, remote operations leads, and cross-border independent contractors. Every calculator route decomposes monthly platform seat charges, funding rail fees, fixed withdrawal deductions, and foreign exchange conversion markups against the interbank mid-market reference rate.
+			</p>
+		</header>
+
+		<section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs space-y-4">
+			<h2 class="text-lg font-bold text-slate-900 sm:text-xl">
+				Published Fee Schedule Sources
+			</h2>
+			<p class="text-sm leading-relaxed text-slate-700">
+				Provider formulas in our open calculation engine rely exclusively on publicly documented business tariff schedules, help-center fee disclosures, and standard list-price SaaS tiers rather than gated enterprise custom contracts. Each modeled payout channel separates upstream treasury funding costs from downstream contractor cash-out deductions:
+			</p>
+			<div class="overflow-x-auto rounded-xl border border-slate-200">
+				<table class="min-w-full divide-y divide-slate-200 text-left text-xs sm:text-sm">
+					<thead class="bg-slate-50 font-semibold uppercase tracking-wide text-slate-600">
+						<tr>
+							<th scope="col" class="px-4 py-3">Provider Rail</th>
+							<th scope="col" class="px-3 py-3 text-right">List Monthly Seat</th>
+							<th scope="col" class="px-3 py-3">Modeled Funding &amp; Withdrawal Structure</th>
+							<th scope="col" class="px-4 py-3 text-right">Baseline FX Spread</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-slate-200 bg-white text-slate-700">
+						<tr>
+							<td class="px-4 py-3 font-semibold text-slate-900">Wise Business</td>
+							<td class="px-3 py-3 text-right">$0.00</td>
+							<td class="px-3 py-3">ACH debit (0.43% + $0.35), domestic wire ($6.11 + 0.43%), or card (2.90% + $0.30); $0 extra withdrawal fee.</td>
+							<td class="px-4 py-3 text-right">0.48%</td>
+						</tr>
+						<tr>
+							<td class="px-4 py-3 font-semibold text-slate-900">Payoneer</td>
+							<td class="px-3 py-3 text-right">$0.00</td>
+							<td class="px-3 py-3">ACH debit (1.00%), wire ($15.00), or card (3.00%); 2.00% same-currency withdrawal ($1.50 min).</td>
+							<td class="px-4 py-3 text-right">2.25%</td>
+						</tr>
+						<tr>
+							<td class="px-4 py-3 font-semibold text-slate-900">Deel Contractor</td>
+							<td class="px-3 py-3 text-right">$49.00</td>
+							<td class="px-3 py-3">$0.00 ACH funding, 3.50% card surcharge, and $5.00 non-ACH fixed withdrawal fee.</td>
+							<td class="px-4 py-3 text-right">1.50%</td>
+						</tr>
+						<tr>
+							<td class="px-4 py-3 font-semibold text-slate-900">Remote Contractor</td>
+							<td class="px-3 py-3 text-right">$29.00</td>
+							<td class="px-3 py-3">$0.00 ACH funding, 3.50% card surcharge, and $0.00 standard local bank withdrawal fee.</td>
+							<td class="px-4 py-3 text-right">1.25%</td>
+						</tr>
+						<tr>
+							<td class="px-4 py-3 font-semibold text-slate-900">Traditional Bank SWIFT</td>
+							<td class="px-3 py-3 text-right">$0.00</td>
+							<td class="px-3 py-3">$35.00 outgoing wire initiation plus $15.00 correspondent intermediary bank deduction.</td>
+							<td class="px-4 py-3 text-right">2.60%</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs space-y-4">
+			<h2 class="text-lg font-bold text-slate-900 sm:text-xl">
+				Mid-Market FX Spread Mathematics
+			</h2>
+			<p class="text-sm leading-relaxed text-slate-700">
+				Many payout platforms advertise zero transfer fees while embedding a retail margin between the interbank mid-market exchange rate and the customer settlement rate. ContractorFX isolates hidden currency spread loss with four deterministic steps:
+			</p>
+			<ol class="list-decimal space-y-2.5 pl-5 text-sm leading-relaxed text-slate-700">
+				<li>
+					<strong class="text-slate-900">Principal normalization:</strong> Invoice amounts in USD, EUR, or GBP are normalized to a gross USD equivalent using reference interbank midpoints so multi-currency corridors share a consistent accounting unit.
+				</li>
+				<li>
+					<strong class="text-slate-900">Seat fee proration:</strong> Monthly per-contractor SaaS subscriptions ($49 on Deel and $29 on Remote) scale by active contractor headcount and prorate across monthly payout frequency to measure true cost per disbursement.
+				</li>
+				<li>
+					<strong class="text-slate-900">Spread drag isolation:</strong> Cross-currency conversion loss equals gross invoice USD value multiplied by the provider spread percentage (set to 0% whenever billing currency and payout currency match). Users can enter a live custom mid-market rate override on any calculator page to benchmark an exact treasury spot quote.
+				</li>
+				<li>
+					<strong class="text-slate-900">Net recipient payout and effective rate:</strong> Depending on whether the contractor or client absorbs funding fees, net USD value reaching the contractor converts at the mid-market target ratio. Effective exchange rate equals actual target currency delivered divided by nominal invoice units.
+				</li>
+			</ol>
+		</section>
+
+		<section class="grid gap-6 md:grid-cols-2">
+			<div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-3">
+				<h2 class="text-lg font-bold text-slate-900">
+					Quarterly Verification Cadence
+				</h2>
+				<p class="text-sm leading-relaxed text-slate-700">
+					Our editorial team audits published tariff schedules, corridor spread bands, and SaaS list prices once per calendar quarter and within seven days of major public pricing updates. The active baseline reflects Q4 2026 (November 2026) published schedules across USD, EUR, GBP, INR, PHP, BRL, MXN, CNY, and CAD corridors.
+				</p>
+				<p class="text-sm leading-relaxed text-slate-700">
+					Providers are ranked strictly by ascending total fee drag in USD. Commercial referral relationships never alter formula weights, default presets, or winner banners.
+				</p>
+			</div>
+
+			<div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-3">
+				<h2 class="text-lg font-bold text-slate-900">
+					Zero-Upload Browser Execution
+				</h2>
+				<p class="text-sm leading-relaxed text-slate-700">
+					Financial controllers cannot upload confidential contractor compensation rosters to untrusted third-party servers. Both our single-corridor calculators and the <a href="/batch-contractor-payout-csv-audit/" class="font-medium text-slate-900 underline hover:text-emerald-800">Team CSV Audit workbench</a> execute 100% inside local browser memory.
+				</p>
+				<p class="text-sm leading-relaxed text-slate-700">
+					Uploaded CSV files are parsed via the client-side JavaScript <code>File</code> API, and downloadable Markdown and CSV routing memos are built locally via <code>Blob</code> URLs with zero server uploads. Read our <a href="/privacy/" class="font-medium text-slate-900 underline hover:text-emerald-800">Privacy Policy</a> for full technical details.
+				</p>
+			</div>
+		</section>
+
+		<section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs space-y-4">
+			<h2 class="text-lg font-bold text-slate-900 sm:text-xl">
+				Non-Affiliation Notice and Editorial Contact
+			</h2>
+			<p class="text-sm leading-relaxed text-slate-700">
+				ContractorFX is an independent benchmarking publication and software utility. ContractorFX is not affiliated with, endorsed by, sponsored by, or operated by Wise Payments Limited, Payoneer Inc., Deel Inc., Remote Technology Inc., or S.W.I.F.T. SC. All company, product, and service names used on this site are for identification and comparative benchmarking only and remain trademarks of their respective owners. Review our <a href="/terms/" class="font-medium text-slate-900 underline hover:text-emerald-800">Terms of Use</a> for informational and FTC affiliate disclosures.
+			</p>
+			<div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 break-words">
+				<strong class="text-slate-900">Editorial &amp; Schedule Corrections:</strong> To report a published fee schedule update, suggest a corridor preset, or request a methodology clarification, email <a href="mailto:hello@contractorfx.com" class="font-semibold text-slate-900 underline hover:text-emerald-800">hello@contractorfx.com</a>.
+			</div>
+		</section>
+	</article>
+</BaseLayout>

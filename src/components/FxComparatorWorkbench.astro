@@ -1,0 +1,1144 @@
+---
+import { auditContractorCsv, comparePayoutProviders } from '../lib/fx-engine';
+import { CORRIDOR_QUICK_PRESETS } from '../lib/route-presets';
+import { SAMPLE_TEAM_CSV } from '../lib/sample-csv';
+import type {
+	BillingCurrency,
+	FeeBearer,
+	FundingMethod,
+	FxRoutePreset,
+	PayoutCurrency,
+	PayoutScenarioInput,
+} from '../lib/types';
+
+interface Props {
+	preset: FxRoutePreset;
+}
+
+const { preset } = Astro.props;
+
+const billingCurrencies: BillingCurrency[] = ['USD', 'EUR', 'GBP'];
+const payoutCurrencies: PayoutCurrency[] = ['EUR', 'GBP', 'INR', 'PHP', 'BRL', 'MXN', 'CNY', 'CAD'];
+const fundingOptions: { value: FundingMethod; label: string }[] = [
+	{ value: 'ach-bank', label: 'ACH / Local Bank Debit' },
+	{ value: 'wire', label: 'Bank Wire Transfer' },
+	{ value: 'card', label: 'Corporate Card' },
+];
+const feeBearerOptions: { value: FeeBearer; label: string }[] = [
+	{ value: 'contractor', label: 'Contractor absorbs transfer & FX fees' },
+	{ value: 'client', label: 'Client absorbs platform & funding fees' },
+];
+
+const initialSummary = comparePayoutProviders(preset.defaultInput);
+const initialBestQuote =
+	initialSummary.quotes.find((q) => q.providerId === initialSummary.bestProviderId) ??
+	initialSummary.quotes[0]!;
+const initialWorstQuote =
+	initialSummary.quotes.find((q) => q.providerId === initialSummary.worstProviderId) ??
+	initialSummary.quotes[initialSummary.quotes.length - 1]!;
+const initialMaxDragUsd = Math.max(
+	...initialSummary.quotes.map((q) => q.totalFeeDragUsd),
+	0.01,
+);
+
+const initialCsvAudit = auditContractorCsv(SAMPLE_TEAM_CSV);
+const isCalculatorMode = preset.mode === 'calculator';
+
+function fmtUsd(amount: number): string {
+	return amount.toLocaleString('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	});
+}
+
+function fmtAmount(amount: number): string {
+	return amount.toLocaleString('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	});
+}
+
+function isMatchingScenario(a: PayoutScenarioInput, b: PayoutScenarioInput): boolean {
+	return (
+		a.invoiceAmount === b.invoiceAmount &&
+		a.billingCurrency === b.billingCurrency &&
+		a.payoutCurrency === b.payoutCurrency &&
+		a.fundingMethod === b.fundingMethod &&
+		a.contractorCount === b.contractorCount &&
+		a.payoutsPerMonth === b.payoutsPerMonth &&
+		a.feeBearer === b.feeBearer
+	);
+}
+
+const providerLabels: Record<string, string> = {
+	wise: 'Wise Business',
+	payoneer: 'Payoneer',
+	deel: 'Deel',
+	remote: 'Remote',
+	'swift-wire': 'Traditional Bank SWIFT',
+};
+---
+
+<div class="space-y-8 min-w-0" data-workbench-root data-initial-mode={preset.mode}>
+	<section class="space-y-3.5">
+		<div class="flex flex-wrap items-center gap-2">
+			<span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900">
+				<span class="h-1.5 w-1.5 rounded-full bg-emerald-600" aria-hidden="true"></span>
+				<span>Zero-Upload Browser Engine</span>
+			</span>
+			<span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
+				Nov 2026 Published Fee Schedules
+			</span>
+			<span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
+				5 Global Payout Rails
+			</span>
+		</div>
+		<h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+			{preset.h1}
+		</h1>
+		<p class="max-w-4xl text-sm leading-relaxed text-slate-600 sm:text-base">
+			{preset.heroSummary}
+		</p>
+	</section>
+
+	<section class="fintech-card rounded-2xl min-w-0">
+		<div
+			role="tablist"
+			aria-label="Comparison mode"
+			class="flex flex-wrap gap-2 border-b border-slate-200 bg-slate-50/90 p-3 rounded-t-2xl"
+		>
+			<button
+				type="button"
+				role="tab"
+				data-testid="tab-calculator"
+				aria-selected={isCalculatorMode ? 'true' : 'false'}
+				class:list={[
+					'min-h-11 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer',
+					isCalculatorMode
+						? 'bg-slate-900 text-white shadow-xs'
+						: 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100',
+				]}
+			>
+				Single Invoice Calculator
+			</button>
+			<button
+				type="button"
+				role="tab"
+				data-testid="tab-csv"
+				aria-selected={!isCalculatorMode ? 'true' : 'false'}
+				class:list={[
+					'min-h-11 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer',
+					!isCalculatorMode
+						? 'bg-slate-900 text-white shadow-xs'
+						: 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100',
+				]}
+			>
+				Team CSV Audit
+			</button>
+		</div>
+
+		<div data-panel="calculator" hidden={!isCalculatorMode} class="space-y-6 p-4 sm:p-7 min-w-0">
+			<div class="rounded-xl border border-slate-200/90 bg-slate-50/70 p-3.5 sm:p-4 space-y-2.5">
+				<div class="flex flex-wrap items-center justify-between gap-2">
+					<p class="text-xs font-bold uppercase tracking-wider text-slate-700">
+						1-Click Corridor Scenarios
+					</p>
+					<span class="text-[11px] font-medium text-slate-500">
+						Loads invoice size, currencies, ACH rail, and seat count
+					</span>
+				</div>
+				<div class="flex flex-wrap gap-2" role="group" aria-label="1-Click Corridor Preset Pills">
+					{
+						CORRIDOR_QUICK_PRESETS.map((pill) => {
+							const active = isMatchingScenario(preset.defaultInput, pill.scenario);
+							return (
+								<button
+									type="button"
+									class="corridor-pill tabular-nums"
+									data-corridor-pill={pill.id}
+									data-amount={String(pill.scenario.invoiceAmount)}
+									data-billing={pill.scenario.billingCurrency}
+									data-payout={pill.scenario.payoutCurrency}
+									data-funding={pill.scenario.fundingMethod}
+									data-contractors={String(pill.scenario.contractorCount)}
+									data-payouts={String(pill.scenario.payoutsPerMonth)}
+									data-fee-bearer={pill.scenario.feeBearer}
+									aria-pressed={active ? 'true' : 'false'}
+								>
+									{pill.label}
+								</button>
+							);
+						})
+					}
+				</div>
+			</div>
+
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<div class="space-y-1.5 min-w-0">
+					<label for="invoice-amount-input" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+						Invoice Amount
+					</label>
+					<input
+						id="invoice-amount-input"
+						data-testid="invoice-amount-input"
+						type="number"
+						min="10"
+						step="any"
+						value={String(preset.defaultInput.invoiceAmount)}
+						class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 tabular-nums focus:border-slate-900 focus:outline-none"
+					/>
+				</div>
+
+				<div class="space-y-1.5 min-w-0">
+					<label for="billing-currency-select" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+						Billing Currency
+					</label>
+					<select
+						id="billing-currency-select"
+						data-testid="billing-currency-select"
+						class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 focus:border-slate-900 focus:outline-none"
+					>
+						{
+							billingCurrencies.map((currency) => (
+								<option value={currency} selected={currency === preset.defaultInput.billingCurrency}>
+									{currency}
+								</option>
+							))
+						}
+					</select>
+				</div>
+
+				<div class="space-y-1.5 min-w-0">
+					<label for="payout-currency-select" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+						Payout Currency
+					</label>
+					<select
+						id="payout-currency-select"
+						data-testid="payout-currency-select"
+						class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 focus:border-slate-900 focus:outline-none"
+					>
+						{
+							payoutCurrencies.map((currency) => (
+								<option value={currency} selected={currency === preset.defaultInput.payoutCurrency}>
+									{currency}
+								</option>
+							))
+						}
+					</select>
+				</div>
+
+				<div class="space-y-1.5 min-w-0">
+					<label for="funding-method-select" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+						Funding Method
+					</label>
+					<select
+						id="funding-method-select"
+						data-testid="funding-method-select"
+						class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 focus:border-slate-900 focus:outline-none"
+					>
+						{
+							fundingOptions.map((item) => (
+								<option value={item.value} selected={item.value === preset.defaultInput.fundingMethod}>
+									{item.label}
+								</option>
+							))
+						}
+					</select>
+				</div>
+
+				<div class="space-y-1.5 min-w-0">
+					<label for="contractor-count-input" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+						Active Contractors
+					</label>
+					<input
+						id="contractor-count-input"
+						data-testid="contractor-count-input"
+						type="number"
+						min="1"
+						max="500"
+						step="1"
+						value={String(preset.defaultInput.contractorCount)}
+						class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 tabular-nums focus:border-slate-900 focus:outline-none"
+					/>
+				</div>
+
+				<div class="space-y-1.5 min-w-0">
+					<label for="payouts-per-month-input" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+						Payouts per Month
+					</label>
+					<input
+						id="payouts-per-month-input"
+						data-testid="payouts-per-month-input"
+						type="number"
+						min="1"
+						max="31"
+						step="1"
+						value={String(preset.defaultInput.payoutsPerMonth)}
+						class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 tabular-nums focus:border-slate-900 focus:outline-none"
+					/>
+				</div>
+
+				<div class="space-y-1.5 min-w-0">
+					<label for="fee-bearer-select" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+						Fee Bearer
+					</label>
+					<select
+						id="fee-bearer-select"
+						data-field="fee-bearer"
+						class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 focus:border-slate-900 focus:outline-none"
+					>
+						{
+							feeBearerOptions.map((item) => (
+								<option value={item.value} selected={item.value === preset.defaultInput.feeBearer}>
+									{item.label}
+								</option>
+							))
+						}
+					</select>
+				</div>
+
+				<div class="space-y-1.5 min-w-0">
+					<label for="custom-mid-rate-input" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+						Custom Mid-Rate Override
+					</label>
+					<input
+						id="custom-mid-rate-input"
+						data-field="custom-mid-rate"
+						type="number"
+						min="0.0001"
+						step="any"
+						value=""
+						placeholder="Optional spot rate"
+						aria-describedby="mid-rate-hint"
+						class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 tabular-nums focus:border-slate-900 focus:outline-none"
+					/>
+					<p id="mid-rate-hint" data-mid-rate-label class="text-[11px] text-slate-500 tabular-nums">
+						Ref mid-rate: 1 {preset.defaultInput.billingCurrency} = {initialSummary.midMarketRate} {preset.defaultInput.payoutCurrency}
+					</p>
+				</div>
+			</div>
+
+			<div
+				data-testid="winner-banner"
+				data-winner={initialSummary.bestProviderId}
+				class="rounded-xl border border-emerald-300 bg-emerald-50/75 p-4 sm:p-5"
+			>
+				<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+					<div class="space-y-1 min-w-0">
+						<p class="text-xs font-bold uppercase tracking-wider text-emerald-800">
+							Lowest Total Fee Drag
+						</p>
+						<p data-winner-headline class="text-xl font-bold text-slate-900 sm:text-2xl tabular-nums">
+							{initialBestQuote.providerName} delivers {fmtAmount(initialBestQuote.netReceivedTargetCurrency)} {preset.defaultInput.payoutCurrency} net per invoice
+						</p>
+						<p data-winner-subline class="text-sm text-slate-700 tabular-nums">
+							Saves ${fmtUsd(initialSummary.annualSavingsBestVsWorstUsd)} over 12 months compared to {initialWorstQuote.providerName} (${fmtUsd(initialBestQuote.totalFeeDragUsd)} vs ${fmtUsd(initialWorstQuote.totalFeeDragUsd)} drag per invoice across {preset.defaultInput.contractorCount} {preset.defaultInput.contractorCount === 1 ? 'contractor' : 'contractors'}).
+						</p>
+					</div>
+					<div class="flex flex-wrap gap-2.5 shrink-0">
+						<button
+							type="button"
+							data-testid="download-memo-md-btn"
+							class="inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800 cursor-pointer"
+						>
+							Export Routing Memo (.md)
+						</button>
+						<button
+							type="button"
+							data-testid="download-memo-csv-btn"
+							class="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-100 cursor-pointer"
+						>
+							Export Fee Table (.csv)
+						</button>
+					</div>
+				</div>
+				<p data-breakeven-note class="mt-3 border-t border-emerald-200/80 pt-3 text-xs leading-relaxed text-slate-700 tabular-nums">
+					{initialSummary.deelBreakEvenNote}
+				</p>
+			</div>
+
+			<div
+				data-testid="fee-drag-visual-bars"
+				class="rounded-xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5 space-y-4 min-w-0"
+			>
+				<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+					<div>
+						<h2 class="text-sm font-bold text-slate-900">
+							Visual Fee-Drag Breakdown per Invoice
+						</h2>
+						<p class="text-xs text-slate-600">
+							Proportional cost layers scaled against the highest-drag provider (1.00% = 100 bps)
+						</p>
+					</div>
+					<div class="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-700">
+						<span class="inline-flex items-center gap-1.5">
+							<span class="h-2.5 w-2.5 rounded-xs fee-bar-seat" aria-hidden="true"></span>
+							<span>Platform Seat Fee</span>
+						</span>
+						<span class="inline-flex items-center gap-1.5">
+							<span class="h-2.5 w-2.5 rounded-xs fee-bar-rail" aria-hidden="true"></span>
+							<span>Rail Fee</span>
+						</span>
+						<span class="inline-flex items-center gap-1.5">
+							<span class="h-2.5 w-2.5 rounded-xs fee-bar-fx" aria-hidden="true"></span>
+							<span>Hidden FX Spread</span>
+						</span>
+					</div>
+				</div>
+
+				<div data-fee-bars-list class="space-y-3">
+					{
+						initialSummary.quotes.map((quote, idx) => {
+							const isBest = idx === 0;
+							const seatDivisor = Math.max(
+								1,
+								preset.defaultInput.contractorCount * preset.defaultInput.payoutsPerMonth,
+							);
+							const seatPerInvoiceUsd = quote.platformMonthlyUsd / seatDivisor;
+							const railFeeUsd = quote.fundingFeeUsd + quote.withdrawalFixedFeeUsd;
+							const fxLossUsd = quote.fxLossUsd;
+							const seatPct = Math.min(100, Math.max(0, (seatPerInvoiceUsd / initialMaxDragUsd) * 100));
+							const railPct = Math.min(100, Math.max(0, (railFeeUsd / initialMaxDragUsd) * 100));
+							const fxPct = Math.min(100, Math.max(0, (fxLossUsd / initialMaxDragUsd) * 100));
+							const totalBps = Math.round(quote.effectiveFeePct * 100);
+							const fxBps = Math.round(quote.fxSpreadPct * 100);
+
+							return (
+								<div
+									data-fee-bar-row={quote.providerId}
+									class:list={[
+										'rounded-lg border p-3 space-y-2',
+										isBest
+											? 'border-emerald-200 bg-white'
+											: 'border-slate-200/80 bg-white/80',
+									]}
+								>
+									<div class="flex flex-wrap items-center justify-between gap-2">
+										<div class="flex flex-wrap items-center gap-2">
+											<span class="text-sm font-semibold text-slate-900">{quote.providerName}</span>
+											{isBest && (
+												<span class="rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+													Best
+												</span>
+											)}
+										</div>
+										<div class="flex items-center gap-2 tabular-nums">
+											<span class={isBest ? 'bps-badge bps-badge-best' : 'bps-badge'}>
+												{totalBps} bps
+											</span>
+											<span class="text-sm font-bold text-slate-900">
+												${fmtUsd(quote.totalFeeDragUsd)}
+											</span>
+										</div>
+									</div>
+
+									<div
+										class="fee-bar-track"
+										role="img"
+										aria-label={`${quote.providerName} total drag $${fmtUsd(quote.totalFeeDragUsd)} (${totalBps} bps)`}
+									>
+										<div class="fee-bar-segment fee-bar-seat" style={`width: ${seatPct.toFixed(2)}%`} />
+										<div class="fee-bar-segment fee-bar-rail" style={`width: ${railPct.toFixed(2)}%`} />
+										<div class="fee-bar-segment fee-bar-fx" style={`width: ${fxPct.toFixed(2)}%`} />
+									</div>
+
+									<p class="text-[11px] text-slate-600 tabular-nums">
+										Seat ${fmtUsd(seatPerInvoiceUsd)} | Rail ${fmtUsd(railFeeUsd)} | Hidden FX ${fmtUsd(fxLossUsd)} ({fxBps} bps spread)
+									</p>
+								</div>
+							);
+						})
+					}
+				</div>
+			</div>
+
+			<div class="min-w-0 overflow-x-auto rounded-xl border border-slate-200">
+				<table data-testid="provider-comparison-table" class="min-w-full divide-y divide-slate-200 text-left text-sm">
+					<thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+						<tr>
+							<th scope="col" class="px-4 py-3">Provider</th>
+							<th scope="col" class="px-3 py-3 text-right">Monthly SaaS</th>
+							<th scope="col" class="px-3 py-3 text-right">Rail Fee</th>
+							<th scope="col" class="px-3 py-3 text-right">FX Spread %</th>
+							<th scope="col" class="px-3 py-3 text-right">FX Loss $</th>
+							<th scope="col" class="px-3 py-3 text-right">Total Drag $</th>
+							<th scope="col" class="px-3 py-3 text-right">Net Target</th>
+							<th scope="col" class="px-4 py-3 text-right">12-Month Loss $</th>
+						</tr>
+					</thead>
+					<tbody data-comparison-tbody class="divide-y divide-slate-200 bg-white">
+						{
+							initialSummary.quotes.map((quote, idx) => {
+								const railFeeUsd = quote.fundingFeeUsd + quote.withdrawalFixedFeeUsd;
+								const isBest = idx === 0;
+								return (
+									<tr class={isBest ? 'bg-emerald-50/40' : ''}>
+										<td class="px-4 py-3.5 align-top">
+											<div class="flex items-center gap-2 font-semibold text-slate-900">
+												<span>{quote.providerName}</span>
+												{isBest && (
+													<span class="rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+														Best
+													</span>
+												)}
+											</div>
+											<p class="mt-0.5 text-xs text-slate-500">{quote.notes}</p>
+										</td>
+										<td class="px-3 py-3.5 text-right align-top font-medium text-slate-800">
+											${fmtUsd(quote.platformMonthlyUsd)}
+										</td>
+										<td class="px-3 py-3.5 text-right align-top font-medium text-slate-800">
+											${fmtUsd(railFeeUsd)}
+										</td>
+										<td class="px-3 py-3.5 text-right align-top font-medium text-slate-800">
+											{quote.fxSpreadPct.toFixed(2)}%
+										</td>
+										<td class="px-3 py-3.5 text-right align-top font-medium text-slate-800">
+											${fmtUsd(quote.fxLossUsd)}
+										</td>
+										<td class="px-3 py-3.5 text-right align-top">
+											<div class="font-semibold text-slate-900">${fmtUsd(quote.totalFeeDragUsd)}</div>
+											<div class="text-xs text-slate-500">{quote.effectiveFeePct.toFixed(2)}% eff.</div>
+										</td>
+										<td class="px-3 py-3.5 text-right align-top font-semibold text-slate-900">
+											{fmtAmount(quote.netReceivedTargetCurrency)} {preset.defaultInput.payoutCurrency}
+										</td>
+										<td class="px-4 py-3.5 text-right align-top font-semibold text-rose-700">
+											${fmtUsd(quote.annualFeeDragUsd)}
+										</td>
+									</tr>
+								);
+							})
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div data-panel="csv-batch" hidden={isCalculatorMode} class="space-y-6 p-4 sm:p-7 min-w-0">
+			<div
+				data-csv-dropzone
+				data-drag-active="false"
+				class="csv-dropzone rounded-xl p-4 sm:p-5 space-y-4"
+			>
+				<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div class="space-y-1 min-w-0">
+						<h2 class="text-base sm:text-lg font-bold text-slate-900">
+							Batch Contractor Roster CSV Audit
+						</h2>
+						<p class="text-xs leading-relaxed text-slate-600">
+							Drag and drop a <code>.csv</code> file into this zone or browse locally. Required columns: <code>contractor, amount, billing_currency, payout_currency, current_provider</code>.
+						</p>
+					</div>
+					<div class="flex flex-wrap items-center gap-2.5 shrink-0">
+						<label class="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-100">
+							<span>Upload Roster CSV</span>
+							<input
+								data-testid="csv-file-upload"
+								type="file"
+								accept=".csv,text/csv"
+								class="sr-only"
+							/>
+						</label>
+						<button
+							type="button"
+							data-testid="load-sample-csv-btn"
+							class="inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800 cursor-pointer"
+						>
+							Load Sample CSV
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="space-y-1.5 min-w-0">
+				<label for="csv-roster-textarea" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+					Contractor Payout CSV Input (100% Local Browser Memory)
+				</label>
+				<textarea
+					id="csv-roster-textarea"
+					data-testid="csv-input"
+					rows="8"
+					spellcheck="false"
+					class="w-full rounded-xl border border-slate-300 bg-slate-950 p-3.5 font-mono text-xs leading-relaxed text-slate-100 focus:border-slate-900 focus:outline-none"
+				>{SAMPLE_TEAM_CSV}</textarea>
+			</div>
+
+			<div
+				data-testid="csv-status-banner"
+				data-status={initialCsvAudit.ok ? 'ok' : 'error'}
+				class:list={[
+					'rounded-lg border px-4 py-3 text-sm font-medium',
+					initialCsvAudit.ok
+						? 'border-emerald-300 bg-emerald-50 text-emerald-950'
+						: 'border-rose-300 bg-rose-50 text-rose-900',
+				]}
+			>
+				{
+					initialCsvAudit.ok
+						? `Audited ${initialCsvAudit.rows.length} contractor payout rows locally with zero network requests.`
+						: initialCsvAudit.error
+				}
+			</div>
+
+			<div data-testid="csv-audit-summary" hidden={!initialCsvAudit.ok} class="space-y-5 min-w-0">
+				{
+					initialCsvAudit.ok && (
+						<>
+							<div data-csv-kpi-grid class="grid gap-4 sm:grid-cols-3">
+								<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+									<p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+										Current Monthly Drag
+									</p>
+									<p class="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
+										${fmtUsd(initialCsvAudit.totalMonthlyCurrentFeeUsd)}
+									</p>
+								</div>
+								<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+									<p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+										Optimal Monthly Drag
+									</p>
+									<p class="mt-1 text-2xl font-bold text-emerald-700 tabular-nums">
+										${fmtUsd(initialCsvAudit.totalMonthlyOptimalFeeUsd)}
+									</p>
+								</div>
+								<div class="rounded-xl border border-emerald-300 bg-emerald-50/70 p-4">
+									<p class="text-xs font-semibold uppercase tracking-wide text-emerald-900">
+										Projected Annual Team Savings
+									</p>
+									<p class="mt-1 text-2xl font-bold text-emerald-800 tabular-nums">
+										${fmtUsd(initialCsvAudit.annualSavingsUsd)}/yr
+									</p>
+									<p class="text-xs text-emerald-900 tabular-nums">
+										Saves ${fmtUsd(initialCsvAudit.totalMonthlyCurrentFeeUsd - initialCsvAudit.totalMonthlyOptimalFeeUsd)}/month across {initialCsvAudit.rows.length} contractors
+									</p>
+								</div>
+							</div>
+
+							<div class="min-w-0 overflow-x-auto rounded-xl border border-slate-200">
+								<table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+									<thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+										<tr>
+											<th scope="col" class="px-4 py-3">Contractor</th>
+											<th scope="col" class="px-3 py-3 text-right">Invoice</th>
+											<th scope="col" class="px-3 py-3">Corridor</th>
+											<th scope="col" class="px-3 py-3">Current Provider</th>
+											<th scope="col" class="px-3 py-3 text-right">Current Fee</th>
+											<th scope="col" class="px-3 py-3">Optimal Provider</th>
+											<th scope="col" class="px-3 py-3 text-right">Optimal Fee</th>
+											<th scope="col" class="px-4 py-3 text-right">Monthly Saved</th>
+										</tr>
+									</thead>
+									<tbody data-csv-rows-tbody class="divide-y divide-slate-200 bg-white">
+										{initialCsvAudit.rows.map((row) => (
+											<tr>
+												<td class="px-4 py-3 font-medium text-slate-900">{row.contractorName}</td>
+												<td class="px-3 py-3 text-right text-slate-800">
+													{fmtAmount(row.invoiceAmount)} {row.billingCurrency}
+												</td>
+												<td class="px-3 py-3 text-slate-700">
+													{row.billingCurrency} to {row.payoutCurrency}
+												</td>
+												<td class="px-3 py-3 text-slate-700">
+													{providerLabels[row.currentProvider] ?? row.currentProvider}
+												</td>
+												<td class="px-3 py-3 text-right text-rose-700">
+													${fmtUsd(row.currentFeeUsd)}
+												</td>
+												<td class="px-3 py-3 font-semibold text-emerald-800">
+													{providerLabels[row.bestProvider] ?? row.bestProvider}
+												</td>
+												<td class="px-3 py-3 text-right text-slate-800">
+													${fmtUsd(row.bestFeeUsd)}
+												</td>
+												<td class="px-4 py-3 text-right font-semibold text-emerald-700">
+													${fmtUsd(row.monthlySavedUsd)}
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						</>
+					)
+				}
+			</div>
+		</div>
+	</section>
+</div>
+
+<script>
+	import { trackToolEvent } from '../lib/analytics';
+	import {
+		auditContractorCsv,
+		comparePayoutProviders,
+		exportComparisonReport,
+	} from '../lib/fx-engine';
+	import { SAMPLE_TEAM_CSV } from '../lib/sample-csv';
+	import type {
+		BillingCurrency,
+		ComparisonSummary,
+		FeeBearer,
+		FundingMethod,
+		PayoutCurrency,
+		PayoutScenarioInput,
+	} from '../lib/types';
+
+	const PROVIDER_NAMES: Record<string, string> = {
+		wise: 'Wise Business',
+		payoneer: 'Payoneer',
+		deel: 'Deel',
+		remote: 'Remote',
+		'swift-wire': 'Traditional Bank SWIFT',
+	};
+
+	const TAB_ACTIVE_CLASS =
+		'min-h-11 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer bg-slate-900 text-white shadow-xs';
+	const TAB_IDLE_CLASS =
+		'min-h-11 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer bg-white text-slate-700 border border-slate-200 hover:bg-slate-100';
+
+	function formatCurrency(value: number): string {
+		return value.toLocaleString('en-US', {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		});
+	}
+
+	function escapeHtml(value: string): string {
+		return value
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function triggerBlobDownload(content: string, filename: string, mimeType: string): void {
+		const blob = new Blob([content], { type: mimeType });
+		const url = URL.createObjectURL(blob);
+		const anchor = document.createElement('a');
+		anchor.href = url;
+		anchor.download = filename;
+		anchor.style.display = 'none';
+		document.body.appendChild(anchor);
+		anchor.click();
+		anchor.remove();
+		window.setTimeout(() => {
+			URL.revokeObjectURL(url);
+		}, 1500);
+	}
+
+	function initWorkbench(root: HTMLElement): void {
+		const tabCalc = root.querySelector<HTMLButtonElement>('[data-testid="tab-calculator"]');
+		const tabCsv = root.querySelector<HTMLButtonElement>('[data-testid="tab-csv"]');
+		const panelCalc = root.querySelector<HTMLElement>('[data-panel="calculator"]');
+		const panelCsv = root.querySelector<HTMLElement>('[data-panel="csv-batch"]');
+
+		const corridorPills = Array.from(
+			root.querySelectorAll<HTMLButtonElement>('[data-corridor-pill]'),
+		);
+
+		const amountInput = root.querySelector<HTMLInputElement>('[data-testid="invoice-amount-input"]');
+		const billingSelect = root.querySelector<HTMLSelectElement>('[data-testid="billing-currency-select"]');
+		const payoutSelect = root.querySelector<HTMLSelectElement>('[data-testid="payout-currency-select"]');
+		const fundingSelect = root.querySelector<HTMLSelectElement>('[data-testid="funding-method-select"]');
+		const contractorInput = root.querySelector<HTMLInputElement>('[data-testid="contractor-count-input"]');
+		const payoutsInput = root.querySelector<HTMLInputElement>('[data-testid="payouts-per-month-input"]');
+		const feeBearerSelect = root.querySelector<HTMLSelectElement>('[data-field="fee-bearer"]');
+		const customMidRateInput = root.querySelector<HTMLInputElement>('[data-field="custom-mid-rate"]');
+		const midRateLabel = root.querySelector<HTMLElement>('[data-mid-rate-label]');
+
+		const winnerBanner = root.querySelector<HTMLElement>('[data-testid="winner-banner"]');
+		const winnerHeadline = root.querySelector<HTMLElement>('[data-winner-headline]');
+		const winnerSubline = root.querySelector<HTMLElement>('[data-winner-subline]');
+		const breakEvenNote = root.querySelector<HTMLElement>('[data-breakeven-note]');
+		const feeBarsList = root.querySelector<HTMLElement>('[data-fee-bars-list]');
+		const comparisonTbody = root.querySelector<HTMLTableSectionElement>('[data-comparison-tbody]');
+		const downloadMdBtn = root.querySelector<HTMLButtonElement>('[data-testid="download-memo-md-btn"]');
+		const downloadCsvBtn = root.querySelector<HTMLButtonElement>('[data-testid="download-memo-csv-btn"]');
+
+		const csvDropzone = root.querySelector<HTMLElement>('[data-csv-dropzone]');
+		const csvTextarea = root.querySelector<HTMLTextAreaElement>('[data-testid="csv-input"]');
+		const csvFileUpload = root.querySelector<HTMLInputElement>('[data-testid="csv-file-upload"]');
+		const loadSampleBtn = root.querySelector<HTMLButtonElement>('[data-testid="load-sample-csv-btn"]');
+		const csvStatusBanner = root.querySelector<HTMLElement>('[data-testid="csv-status-banner"]');
+		const csvSummaryBox = root.querySelector<HTMLElement>('[data-testid="csv-audit-summary"]');
+		const csvKpiGrid = root.querySelector<HTMLElement>('[data-csv-kpi-grid]');
+		const csvRowsTbody = root.querySelector<HTMLTableSectionElement>('[data-csv-rows-tbody]');
+
+		function setMode(mode: 'calculator' | 'csv-batch'): void {
+			if (!tabCalc || !tabCsv || !panelCalc || !panelCsv) return;
+			const isCalc = mode === 'calculator';
+			panelCalc.hidden = !isCalc;
+			panelCsv.hidden = isCalc;
+			tabCalc.setAttribute('aria-selected', isCalc ? 'true' : 'false');
+			tabCsv.setAttribute('aria-selected', !isCalc ? 'true' : 'false');
+			tabCalc.className = isCalc ? TAB_ACTIVE_CLASS : TAB_IDLE_CLASS;
+			tabCsv.className = !isCalc ? TAB_ACTIVE_CLASS : TAB_IDLE_CLASS;
+		}
+
+		tabCalc?.addEventListener('click', () => setMode('calculator'));
+		tabCsv?.addEventListener('click', () => setMode('csv-batch'));
+
+		function readCurrentInput(): { input: PayoutScenarioInput; customMidRate?: number } {
+			const rawAmount = Number(amountInput?.value ?? 0);
+			const invoiceAmount = Number.isFinite(rawAmount) && rawAmount >= 0 ? rawAmount : 0;
+			const billingCurrency = (billingSelect?.value || 'USD') as BillingCurrency;
+			const payoutCurrency = (payoutSelect?.value || 'INR') as PayoutCurrency;
+			const fundingMethod = (fundingSelect?.value || 'ach-bank') as FundingMethod;
+			const rawContractors = Number(contractorInput?.value ?? 1);
+			const contractorCount =
+				Number.isFinite(rawContractors) && rawContractors >= 1
+					? Math.min(500, Math.floor(rawContractors))
+					: 1;
+			const rawPayouts = Number(payoutsInput?.value ?? 1);
+			const payoutsPerMonth =
+				Number.isFinite(rawPayouts) && rawPayouts >= 1
+					? Math.min(31, Math.floor(rawPayouts))
+					: 1;
+			const feeBearer = (feeBearerSelect?.value || 'contractor') as FeeBearer;
+
+			const rawMid = customMidRateInput?.value.trim() ?? '';
+			const parsedMid = rawMid.length > 0 ? Number(rawMid) : Number.NaN;
+			const customMidRate =
+				Number.isFinite(parsedMid) && parsedMid > 0 ? parsedMid : undefined;
+
+			return {
+				input: {
+					invoiceAmount,
+					billingCurrency,
+					payoutCurrency,
+					fundingMethod,
+					contractorCount,
+					payoutsPerMonth,
+					feeBearer,
+				},
+				customMidRate,
+			};
+		}
+
+		function syncActivePresetPill(input: PayoutScenarioInput, customMidRate?: number): void {
+			for (const pill of corridorPills) {
+				const matches =
+					customMidRate === undefined &&
+					Number(pill.dataset.amount) === input.invoiceAmount &&
+					pill.dataset.billing === input.billingCurrency &&
+					pill.dataset.payout === input.payoutCurrency &&
+					pill.dataset.funding === input.fundingMethod &&
+					Number(pill.dataset.contractors) === input.contractorCount &&
+					Number(pill.dataset.payouts) === input.payoutsPerMonth &&
+					pill.dataset.feeBearer === input.feeBearer;
+				pill.setAttribute('aria-pressed', matches ? 'true' : 'false');
+			}
+		}
+
+		let latestInput: PayoutScenarioInput = readCurrentInput().input;
+		let latestSummary: ComparisonSummary = comparePayoutProviders(
+			latestInput,
+			readCurrentInput().customMidRate,
+		);
+
+		function renderCalculator(): void {
+			const { input, customMidRate } = readCurrentInput();
+			const summary = comparePayoutProviders(input, customMidRate);
+			latestInput = input;
+			latestSummary = summary;
+
+			syncActivePresetPill(input, customMidRate);
+
+			const bestQuote =
+				summary.quotes.find((q) => q.providerId === summary.bestProviderId) ??
+				summary.quotes[0]!;
+			const worstQuote =
+				summary.quotes.find((q) => q.providerId === summary.worstProviderId) ??
+				summary.quotes[summary.quotes.length - 1]!;
+
+			if (midRateLabel) {
+				const sourceTag = customMidRate ? 'Custom mid-rate' : 'Ref mid-rate';
+				midRateLabel.textContent = `${sourceTag}: 1 ${input.billingCurrency} = ${summary.midMarketRate} ${input.payoutCurrency}`;
+			}
+
+			if (winnerBanner) {
+				winnerBanner.setAttribute('data-winner', summary.bestProviderId);
+			}
+			if (winnerHeadline) {
+				winnerHeadline.textContent = `${bestQuote.providerName} delivers ${formatCurrency(bestQuote.netReceivedTargetCurrency)} ${input.payoutCurrency} net per invoice`;
+			}
+			if (winnerSubline) {
+				const unit = input.contractorCount === 1 ? 'contractor' : 'contractors';
+				winnerSubline.textContent = `Saves $${formatCurrency(summary.annualSavingsBestVsWorstUsd)} over 12 months compared to ${worstQuote.providerName} ($${formatCurrency(bestQuote.totalFeeDragUsd)} vs $${formatCurrency(worstQuote.totalFeeDragUsd)} drag per invoice across ${input.contractorCount} ${unit}).`;
+			}
+			if (breakEvenNote) {
+				breakEvenNote.textContent = summary.deelBreakEvenNote;
+			}
+
+			if (feeBarsList) {
+				const maxDragUsd = Math.max(
+					...summary.quotes.map((q) => q.totalFeeDragUsd),
+					0.01,
+				);
+				const seatDivisor = Math.max(1, input.contractorCount * input.payoutsPerMonth);
+
+				feeBarsList.innerHTML = summary.quotes
+					.map((quote, index) => {
+						const isBest = index === 0;
+						const seatPerInvoiceUsd = quote.platformMonthlyUsd / seatDivisor;
+						const railFeeUsd = quote.fundingFeeUsd + quote.withdrawalFixedFeeUsd;
+						const fxLossUsd = quote.fxLossUsd;
+						const seatPct = Math.min(100, Math.max(0, (seatPerInvoiceUsd / maxDragUsd) * 100));
+						const railPct = Math.min(100, Math.max(0, (railFeeUsd / maxDragUsd) * 100));
+						const fxPct = Math.min(100, Math.max(0, (fxLossUsd / maxDragUsd) * 100));
+						const totalBps = Math.round(quote.effectiveFeePct * 100);
+						const fxBps = Math.round(quote.fxSpreadPct * 100);
+						const rowBorderClass = isBest
+							? 'border-emerald-200 bg-white'
+							: 'border-slate-200/80 bg-white/80';
+						const badgeHtml = isBest
+							? '<span class="rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">Best</span>'
+							: '';
+						const bpsClass = isBest ? 'bps-badge bps-badge-best' : 'bps-badge';
+
+						return `<div data-fee-bar-row="${escapeHtml(quote.providerId)}" class="rounded-lg border p-3 space-y-2 ${rowBorderClass}">
+							<div class="flex flex-wrap items-center justify-between gap-2">
+								<div class="flex flex-wrap items-center gap-2">
+									<span class="text-sm font-semibold text-slate-900">${escapeHtml(quote.providerName)}</span>
+									${badgeHtml}
+								</div>
+								<div class="flex items-center gap-2 tabular-nums">
+									<span class="${bpsClass}">${totalBps} bps</span>
+									<span class="text-sm font-bold text-slate-900">$${formatCurrency(quote.totalFeeDragUsd)}</span>
+								</div>
+							</div>
+							<div class="fee-bar-track" role="img" aria-label="${escapeHtml(quote.providerName)} total drag $${formatCurrency(quote.totalFeeDragUsd)} (${totalBps} bps)">
+								<div class="fee-bar-segment fee-bar-seat" style="width: ${seatPct.toFixed(2)}%"></div>
+								<div class="fee-bar-segment fee-bar-rail" style="width: ${railPct.toFixed(2)}%"></div>
+								<div class="fee-bar-segment fee-bar-fx" style="width: ${fxPct.toFixed(2)}%"></div>
+							</div>
+							<p class="text-[11px] text-slate-600 tabular-nums">Seat $${formatCurrency(seatPerInvoiceUsd)} | Rail $${formatCurrency(railFeeUsd)} | Hidden FX $${formatCurrency(fxLossUsd)} (${fxBps} bps spread)</p>
+						</div>`;
+					})
+					.join('');
+			}
+
+			if (comparisonTbody) {
+				comparisonTbody.innerHTML = summary.quotes
+					.map((quote, index) => {
+						const isBest = index === 0;
+						const railFeeUsd = quote.fundingFeeUsd + quote.withdrawalFixedFeeUsd;
+						const badgeHtml = isBest
+							? '<span class="rounded bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">Best</span>'
+							: '';
+						return `<tr class="${isBest ? 'bg-emerald-50/40' : ''}">
+							<td class="px-4 py-3.5 align-top">
+								<div class="flex items-center gap-2 font-semibold text-slate-900">
+									<span>${escapeHtml(quote.providerName)}</span>
+									${badgeHtml}
+								</div>
+								<p class="mt-0.5 text-xs text-slate-500">${escapeHtml(quote.notes)}</p>
+							</td>
+							<td class="px-3 py-3.5 text-right align-top font-medium text-slate-800">$${formatCurrency(quote.platformMonthlyUsd)}</td>
+							<td class="px-3 py-3.5 text-right align-top font-medium text-slate-800">$${formatCurrency(railFeeUsd)}</td>
+							<td class="px-3 py-3.5 text-right align-top font-medium text-slate-800">${quote.fxSpreadPct.toFixed(2)}%</td>
+							<td class="px-3 py-3.5 text-right align-top font-medium text-slate-800">$${formatCurrency(quote.fxLossUsd)}</td>
+							<td class="px-3 py-3.5 text-right align-top">
+								<div class="font-semibold text-slate-900">$${formatCurrency(quote.totalFeeDragUsd)}</div>
+								<div class="text-xs text-slate-500">${quote.effectiveFeePct.toFixed(2)}% eff.</div>
+							</td>
+							<td class="px-3 py-3.5 text-right align-top font-semibold text-slate-900">${formatCurrency(quote.netReceivedTargetCurrency)} ${escapeHtml(input.payoutCurrency)}</td>
+							<td class="px-4 py-3.5 text-right align-top font-semibold text-rose-700">$${formatCurrency(quote.annualFeeDragUsd)}</td>
+						</tr>`;
+					})
+					.join('');
+			}
+		}
+
+		for (const pill of corridorPills) {
+			pill.addEventListener('click', () => {
+				if (amountInput && pill.dataset.amount) amountInput.value = pill.dataset.amount;
+				if (billingSelect && pill.dataset.billing) billingSelect.value = pill.dataset.billing;
+				if (payoutSelect && pill.dataset.payout) payoutSelect.value = pill.dataset.payout;
+				if (fundingSelect && pill.dataset.funding) fundingSelect.value = pill.dataset.funding;
+				if (contractorInput && pill.dataset.contractors) contractorInput.value = pill.dataset.contractors;
+				if (payoutsInput && pill.dataset.payouts) payoutsInput.value = pill.dataset.payouts;
+				if (feeBearerSelect && pill.dataset.feeBearer) feeBearerSelect.value = pill.dataset.feeBearer;
+				if (customMidRateInput) customMidRateInput.value = '';
+
+				renderCalculator();
+				trackToolEvent('corridor_changed', {
+					billing: latestInput.billingCurrency,
+					payout: latestInput.payoutCurrency,
+				});
+			});
+		}
+
+		const calcControls = [
+			amountInput,
+			billingSelect,
+			payoutSelect,
+			fundingSelect,
+			contractorInput,
+			payoutsInput,
+			feeBearerSelect,
+			customMidRateInput,
+		];
+
+		for (const control of calcControls) {
+			control?.addEventListener('input', renderCalculator);
+			control?.addEventListener('change', renderCalculator);
+		}
+
+		const handleCorridorSelectChange = (): void => {
+			trackToolEvent('corridor_changed', {
+				billing: latestInput.billingCurrency,
+				payout: latestInput.payoutCurrency,
+			});
+		};
+
+		billingSelect?.addEventListener('change', handleCorridorSelectChange);
+		payoutSelect?.addEventListener('change', handleCorridorSelectChange);
+
+		downloadMdBtn?.addEventListener('click', () => {
+			renderCalculator();
+			const content = exportComparisonReport(latestInput, latestSummary, 'md');
+			const filename = `contractor-payout-memo-${latestInput.billingCurrency.toLowerCase()}-${latestInput.payoutCurrency.toLowerCase()}.md`;
+			triggerBlobDownload(content, filename, 'text/markdown;charset=utf-8');
+			trackToolEvent('payout_calc_export', { format: 'md' });
+		});
+
+		downloadCsvBtn?.addEventListener('click', () => {
+			renderCalculator();
+			const content = exportComparisonReport(latestInput, latestSummary, 'csv');
+			const filename = `contractor-payout-comparison-${latestInput.billingCurrency.toLowerCase()}-${latestInput.payoutCurrency.toLowerCase()}.csv`;
+			triggerBlobDownload(content, filename, 'text/csv;charset=utf-8');
+			trackToolEvent('payout_calc_export', { format: 'csv' });
+		});
+
+		let lastTrackedCsvSignature = SAMPLE_TEAM_CSV.trim();
+
+		function renderCsvAudit(rawCsv: string, forceTrack = false): void {
+			const audit = auditContractorCsv(rawCsv);
+			if (!csvStatusBanner || !csvSummaryBox) return;
+
+			if (!audit.ok) {
+				csvStatusBanner.setAttribute('data-status', 'error');
+				csvStatusBanner.className =
+					'rounded-lg border px-4 py-3 text-sm font-medium border-rose-300 bg-rose-50 text-rose-900';
+				csvStatusBanner.textContent = audit.error;
+				csvSummaryBox.hidden = true;
+				lastTrackedCsvSignature = '';
+				return;
+			}
+
+			csvStatusBanner.setAttribute('data-status', 'ok');
+			csvStatusBanner.className =
+				'rounded-lg border px-4 py-3 text-sm font-medium border-emerald-300 bg-emerald-50 text-emerald-950';
+			csvStatusBanner.textContent = `Audited ${audit.rows.length} contractor payout rows locally with zero network requests.`;
+			csvSummaryBox.hidden = false;
+
+			const normalizedSig = rawCsv.trim();
+			if (forceTrack || normalizedSig !== lastTrackedCsvSignature) {
+				lastTrackedCsvSignature = normalizedSig;
+				trackToolEvent('batch_csv_audited', { row_count: audit.rows.length });
+			}
+
+			const monthlySaved = audit.totalMonthlyCurrentFeeUsd - audit.totalMonthlyOptimalFeeUsd;
+
+			if (csvKpiGrid) {
+				csvKpiGrid.innerHTML = `
+					<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+						<p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Current Monthly Drag</p>
+						<p class="mt-1 text-2xl font-bold text-slate-900 tabular-nums">$${formatCurrency(audit.totalMonthlyCurrentFeeUsd)}</p>
+					</div>
+					<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+						<p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Optimal Monthly Drag</p>
+						<p class="mt-1 text-2xl font-bold text-emerald-700 tabular-nums">$${formatCurrency(audit.totalMonthlyOptimalFeeUsd)}</p>
+					</div>
+					<div class="rounded-xl border border-emerald-300 bg-emerald-50/70 p-4">
+						<p class="text-xs font-semibold uppercase tracking-wide text-emerald-900">Projected Annual Team Savings</p>
+						<p class="mt-1 text-2xl font-bold text-emerald-800 tabular-nums">$${formatCurrency(audit.annualSavingsUsd)}/yr</p>
+						<p class="text-xs text-emerald-900 tabular-nums">Saves $${formatCurrency(monthlySaved)}/month across ${audit.rows.length} contractors</p>
+					</div>
+				`;
+			}
+
+			if (csvRowsTbody) {
+				csvRowsTbody.innerHTML = audit.rows
+					.map((row) => {
+						const curLabel = PROVIDER_NAMES[row.currentProvider] ?? row.currentProvider;
+						const bestLabel = PROVIDER_NAMES[row.bestProvider] ?? row.bestProvider;
+						return `<tr>
+							<td class="px-4 py-3 font-medium text-slate-900">${escapeHtml(row.contractorName)}</td>
+							<td class="px-3 py-3 text-right text-slate-800">${formatCurrency(row.invoiceAmount)} ${escapeHtml(row.billingCurrency)}</td>
+							<td class="px-3 py-3 text-slate-700">${escapeHtml(row.billingCurrency)} to ${escapeHtml(row.payoutCurrency)}</td>
+							<td class="px-3 py-3 text-slate-700">${escapeHtml(curLabel)}</td>
+							<td class="px-3 py-3 text-right text-rose-700">$${formatCurrency(row.currentFeeUsd)}</td>
+							<td class="px-3 py-3 font-semibold text-emerald-800">${escapeHtml(bestLabel)}</td>
+							<td class="px-3 py-3 text-right text-slate-800">$${formatCurrency(row.bestFeeUsd)}</td>
+							<td class="px-4 py-3 text-right font-semibold text-emerald-700">$${formatCurrency(row.monthlySavedUsd)}</td>
+						</tr>`;
+					})
+					.join('');
+			}
+		}
+
+		async function ingestCsvFile(file: File | undefined): Promise<void> {
+			if (!file) return;
+			const text = await file.text();
+			if (csvTextarea) {
+				csvTextarea.value = text;
+			}
+			renderCsvAudit(text, true);
+		}
+
+		csvTextarea?.addEventListener('input', () => {
+			renderCsvAudit(csvTextarea.value, false);
+		});
+
+		csvFileUpload?.addEventListener('change', async () => {
+			const file = csvFileUpload.files?.[0];
+			await ingestCsvFile(file);
+			csvFileUpload.value = '';
+		});
+
+		if (csvDropzone) {
+			let dragDepth = 0;
+
+			csvDropzone.addEventListener('dragenter', (event) => {
+				event.preventDefault();
+				dragDepth += 1;
+				csvDropzone.setAttribute('data-drag-active', 'true');
+			});
+
+			csvDropzone.addEventListener('dragover', (event) => {
+				event.preventDefault();
+				csvDropzone.setAttribute('data-drag-active', 'true');
+			});
+
+			csvDropzone.addEventListener('dragleave', () => {
+				dragDepth = Math.max(0, dragDepth - 1);
+				if (dragDepth === 0) {
+					csvDropzone.setAttribute('data-drag-active', 'false');
+				}
+			});
+
+			csvDropzone.addEventListener('drop', async (event) => {
+				event.preventDefault();
+				dragDepth = 0;
+				csvDropzone.setAttribute('data-drag-active', 'false');
+				const file = event.dataTransfer?.files?.[0];
+				await ingestCsvFile(file);
+			});
+		}
+
+		loadSampleBtn?.addEventListener('click', () => {
+			if (csvTextarea) {
+				csvTextarea.value = SAMPLE_TEAM_CSV;
+			}
+			renderCsvAudit(SAMPLE_TEAM_CSV, true);
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-workbench-root]').forEach((root) => {
+		initWorkbench(root);
+	});
+</script>

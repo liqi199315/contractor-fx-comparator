@@ -1,0 +1,29 @@
+# ContractorFX
+
+> Browser-local international contractor payout fee and FX spread comparator across Wise, Payoneer, Deel, Remote, and SWIFT bank wires.
+
+ContractorFX models monthly SaaS seat fees, funding rail costs (ACH, wire, corporate card), fixed local withdrawal fees, and retail exchange rate spreads against reference mid-market interbank rates. Every calculation, CSV team roster audit, and Markdown or CSV routing memo export executes locally in the browser with zero server uploads.
+
+Rate methodology and independence disclaimer: Independent fee modeling tool; not financial or tax advice; not affiliated with Wise, Payoneer, Deel, or Remote. Reference mid-market rates and published schedule estimates as of Nov 2026; verify live checkout quotes before transfer.
+
+## Core Calculators and Audit Tools
+
+- [Wise vs Payoneer Calculator](https://contractorfx.com/): Default $3,500 USD to INR contractor payout benchmark across all five payout providers.
+- [Wise vs Payoneer Fee Calculator](https://contractorfx.com/wise-vs-payoneer-fee-calculator/): Detailed conversion spread and local bank withdrawal comparison defaulted to $2,000 USD to PHP.
+- [Deel vs Remote Contractor Calculator](https://contractorfx.com/deel-vs-remote-contractor-calculator/): Multi-contractor SaaS seat cost ($49 vs $29/mo) and BRL FX spread comparison for 5-contractor teams.
+- [Deel vs Wise Contractor Payouts](https://contractorfx.com/deel-vs-wise-contractor-payouts/): 8-contractor USD to EUR team payout benchmark with downloadable CFO routing memos.
+- [Deel Withdrawal Fee Calculator](https://contractorfx.com/deel-withdrawal-fee-calculator/): Contractor cash-out deduction model for $3,000 USD to MXN across wire and local rails.
+- [Batch Contractor Payout CSV Audit](https://contractorfx.com/batch-contractor-payout-csv-audit/): Client-side multi-corridor CSV roster fee auditor computing monthly and 12-month team FX savings.
+
+## Methodology, Privacy, and Governance
+
+- [About and Fee Methodology](https://contractorfx.com/about/): How ContractorFX models mid-market interbank rates, SaaS seat fees, funding rails, and local bank withdrawal spreads.
+- [Privacy Policy](https://contractorfx.com/privacy/): 100% browser-local payroll computation architecture, zero CSV upload guarantee, and sanitized attribution analytics.
+- [Terms of Use and Disclaimers](https://contractorfx.com/terms/): Non-affiliation notice, financial modeling scope, and live quote verification requirements.
+
+## Supported Currencies and Providers
+
+- Billing currencies: USD, EUR, GBP
+- Payout currencies: EUR, GBP, INR, PHP, BRL, MXN, CNY, CAD
+- Benchmarked providers: Wise, Payoneer, Deel, Remote, SWIFT Wire
+- Discovery index: https://contractorfx.com/sitemap-index.xml

@@ -1,0 +1,20 @@
+{
+	"name": "ContractorFX Global Payout & FX Spread Comparator",
+	"short_name": "ContractorFX",
+	"description": "Browser-local international contractor payout fee and FX spread comparator across Wise, Payoneer, Deel, Remote, and SWIFT bank wires.",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#f8fafc",
+	"theme_color": "#0f172a",
+	"lang": "en-US",
+	"categories": ["finance", "business", "productivity"],
+	"icons": [
+		{
+			"src": "/favicon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		}
+	]
+}

@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+	title="Privacy Policy and Zero-Upload Data Guarantee | ContractorFX"
+	description="Read the ContractorFX privacy policy: contractor invoices and team CSV files stay in your browser, with anonymized GA4 telemetry and GDPR/CCPA rights."
+	canonicalPath="/privacy/"
+>
+	<article class="mx-auto max-w-4xl space-y-8">
+		<header class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs space-y-3">
+			<div class="inline-flex flex-wrap items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-900">
+				<span>Zero-Upload Architecture</span>
+				<span aria-hidden="true">/</span>
+				<span>Effective November 12, 2026</span>
+			</div>
+			<h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+				Privacy Policy and Zero-Upload Guarantee
+			</h1>
+			<p class="text-sm leading-relaxed text-slate-600 sm:text-base">
+				ContractorFX (<a href="/" class="font-medium text-slate-900 underline hover:text-emerald-800">contractorfx.com</a>) is engineered so you can benchmark contractor compensation and payment corridors without exposing payroll records. Your invoice amounts, contractor names, and team CSV files never leave your browser.
+			</p>
+		</header>
+
+		<section class="rounded-2xl border border-emerald-300 bg-emerald-50/70 p-5 sm:p-8 shadow-xs space-y-3">
+			<h2 class="text-lg font-bold text-slate-900 sm:text-xl">
+				1. Explicit Browser-Local Processing Guarantee
+			</h2>
+			<p class="text-sm leading-relaxed text-slate-800">
+				Every calculation on ContractorFX executes strictly inside your device's local JavaScript memory:
+			</p>
+			<ul class="list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-800">
+				<li>
+					<strong class="text-slate-950">Single-invoice calculator inputs:</strong> Invoice figures, billing and payout currencies, active headcount, payout cadence, fee-bearer choices, and custom mid-market exchange rate overrides are evaluated client-side and are never submitted to a backend API or database.
+				</li>
+				<li>
+					<strong class="text-slate-950">Team CSV roster files:</strong> When you paste CSV rows or select a local file on <a href="/batch-contractor-payout-csv-audit/" class="font-semibold text-slate-950 underline hover:text-emerald-900">Batch Contractor Payout CSV Audit</a>, the file is read directly in memory via the standard browser <code>File.text()</code> interface. Zero bytes of your CSV roster or contractor names are uploaded over the network.
+				</li>
+				<li>
+					<strong class="text-slate-950">Memo and CSV downloads:</strong> Exported CFO routing memos (<code>.md</code>) and fee comparison tables (<code>.csv</code>) are synthesized locally using browser <code>Blob</code> objects.
+				</li>
+			</ul>
+		</section>
+
+		<section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs space-y-4">
+			<h2 class="text-lg font-bold text-slate-900 sm:text-xl">
+				2. Anonymized GA4 Event Policy
+			</h2>
+			<p class="text-sm leading-relaxed text-slate-700">
+				When Google Analytics 4 (<code>gtag.js</code>) is active on the production domain, ContractorFX collects aggregate, de-identified product usage telemetry solely to understand which corridor benchmarks are useful and whether export tools work reliably:
+			</p>
+			<ul class="list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-700">
+				<li>
+					<strong class="text-slate-900">What is measured:</strong> Page URLs visited, coarse interaction events (such as switching calculator modes, downloading a Markdown or CSV memo format tag, completing a valid sample or batch audit count, or clicking an outbound provider link), device viewport category, and approximate country/region derived prior to IP truncation.
+				</li>
+				<li>
+					<strong class="text-slate-900">What is strictly excluded:</strong> ContractorFX never sends raw invoice dollar amounts, custom exchange rates, contractor names, company names, email addresses, or CSV cell contents inside analytics event parameters.
+				</li>
+				<li>
+					<strong class="text-slate-900">Privacy controls:</strong> GA4 initialization sets <code>anonymize_ip: true</code> and disables Google Signals cross-device advertising personalization. Visitors using browser content blockers, Brave Shields, Firefox Enhanced Tracking Protection, or script-blocking extensions retain 100% access to every calculator and export feature.
+				</li>
+			</ul>
+		</section>
+
+		<section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs space-y-4">
+			<h2 class="text-lg font-bold text-slate-900 sm:text-xl">
+				3. Static Edge Hosting, Cookies, and Partner Links
+			</h2>
+			<p class="text-sm leading-relaxed text-slate-700">
+				ContractorFX is served as static HTML, CSS, and JavaScript through Cloudflare Workers Static Assets. Like all internet web servers, Cloudflare processes transient HTTP request headers (connecting IP address, TLS cipher, user-agent string, and requested path) to deliver static files and mitigate automated attacks. ContractorFX does not maintain user accounts, login sessions, or server-side payroll databases.
+			</p>
+			<p class="text-sm leading-relaxed text-slate-700">
+				ContractorFX does not place behavioral advertising pixels on its pages. Where ContractorFX links to external financial platforms using <code>rel="sponsored noopener"</code> (such as Wise via Partnerize or the Deel Affiliate program, as detailed in our <a href="/terms/" class="font-medium text-slate-900 underline hover:text-emerald-800">Terms of Use</a>), clicking that external link navigates you to the third-party provider's domain, where their own cookie and privacy policies govern attribution and onboarding.
+			</p>
+		</section>
+
+		<section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs space-y-4">
+			<h2 class="text-lg font-bold text-slate-900 sm:text-xl">
+				4. GDPR, UK GDPR, and CCPA / CPRA Disclosures
+			</h2>
+			<div class="grid gap-5 md:grid-cols-2">
+				<div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+					<h3 class="text-sm font-bold text-slate-900">
+						EEA, UK, and Swiss Visitors (GDPR)
+					</h3>
+					<p class="text-xs leading-relaxed text-slate-700">
+						Under Article 6(1)(f) of the General Data Protection Regulation, transient edge security logs are processed under legitimate interest to keep static delivery secure. Because ContractorFX stores zero personal payroll files on its servers, we hold no individual compensation records tied to your identity. You retain the right to request access, erasure, or restriction regarding any direct email correspondence sent to us.
+					</p>
+				</div>
+				<div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+					<h3 class="text-sm font-bold text-slate-900">
+						California Residents (CCPA / CPRA)
+					</h3>
+					<p class="text-xs leading-relaxed text-slate-700">
+						ContractorFX does not "sell" or "share" personal information for cross-context behavioral advertising as defined under the California Consumer Privacy Act and California Privacy Rights Act, and does not collect sensitive personal information such as Social Security numbers, bank account numbers, or tax identifiers.
+					</p>
+				</div>
+			</div>
+			<p class="text-sm leading-relaxed text-slate-700 break-words">
+				For privacy inquiries, data subject requests, or questions about our <a href="/about/" class="font-medium text-slate-900 underline hover:text-emerald-800">editorial and technical architecture</a>, contact <a href="mailto:hello@contractorfx.com" class="font-semibold text-slate-900 underline hover:text-emerald-800">hello@contractorfx.com</a>.
+			</p>
+		</section>
+	</article>
+</BaseLayout>

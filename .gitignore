@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+playwright-report/
+test-results/
+reports/
+.DS_Store
+
+# Secret guards
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
