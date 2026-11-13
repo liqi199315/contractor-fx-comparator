@@ -1,6 +1,6 @@
 ---
 import { auditContractorCsv, comparePayoutProviders } from '../lib/fx-engine';
-import { CORRIDOR_QUICK_PRESETS } from '../lib/route-presets';
+import { CORRIDOR_QUICK_PRESETS, MARKETPLACE_WITHDRAWAL_PRESETS } from '../lib/route-presets';
 import { SAMPLE_TEAM_CSV } from '../lib/sample-csv';
 import type {
 	BillingCurrency,
@@ -23,6 +23,7 @@ const fundingOptions: { value: FundingMethod; label: string }[] = [
 	{ value: 'ach-bank', label: 'ACH / Local Bank Debit' },
 	{ value: 'wire', label: 'Bank Wire Transfer' },
 	{ value: 'card', label: 'Corporate Card' },
+	{ value: 'received-balance', label: 'Already in balance (no new funding fee)' },
 ];
 const feeBearerOptions: { value: FeeBearer; label: string }[] = [
 	{ value: 'contractor', label: 'Contractor absorbs transfer & FX fees' },
@@ -43,6 +44,15 @@ const initialMaxDragUsd = Math.max(
 
 const initialCsvAudit = auditContractorCsv(SAMPLE_TEAM_CSV);
 const isCalculatorMode = preset.mode === 'calculator';
+const marketplacePresets = MARKETPLACE_WITHDRAWAL_PRESETS.filter((item) =>
+	(preset.marketplacePresetIds ?? []).includes(item.id),
+);
+const showMarketplace = marketplacePresets.length > 0;
+const defaultMarketplace =
+	marketplacePresets.find((item) => item.id === preset.defaultMarketplacePresetId) ??
+	marketplacePresets[0];
+const initialMarketplaceUsd =
+	initialSummary.marketplaceFeeDisclosure === 'applied' ? initialSummary.marketplaceWithdrawalFeeUsd : 0;
 
 function fmtUsd(amount: number): string {
 	return amount.toLocaleString('en-US', {
@@ -318,6 +328,66 @@ const providerLabels: Record<string, string> = {
 				</div>
 			</div>
 
+			{
+				showMarketplace && defaultMarketplace && (
+					<div class="rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 sm:p-4 space-y-3">
+						<div class="flex flex-wrap items-end justify-between gap-3">
+							<div class="space-y-1.5 min-w-0 flex-1">
+								<label for="marketplace-preset-select" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+									Marketplace withdrawal preset
+								</label>
+								<select
+									id="marketplace-preset-select"
+									data-testid="marketplace-preset-select"
+									data-field="marketplace-preset"
+									class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 focus:border-slate-900 focus:outline-none"
+								>
+									{marketplacePresets.map((item) => (
+										<option
+											value={item.id}
+											selected={item.id === defaultMarketplace.id}
+											data-fee={item.fixedFeeUsd === null ? '' : String(item.fixedFeeUsd)}
+											data-specified={item.fixedFeeUsd === null ? 'false' : 'true'}
+											data-note={item.sourceNote}
+										>
+											{item.label}
+										</option>
+									))}
+								</select>
+							</div>
+							<div class="space-y-1.5 w-full sm:w-56">
+								<label for="marketplace-fee-input" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">
+									Marketplace fee (USD)
+								</label>
+								<input
+									id="marketplace-fee-input"
+									data-testid="marketplace-fee-input"
+									data-field="marketplace-fee"
+									type="number"
+									min="0"
+									step="any"
+									value={defaultMarketplace.fixedFeeUsd === null ? '' : String(defaultMarketplace.fixedFeeUsd)}
+									placeholder="Not entered"
+									class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm font-medium text-slate-900 tabular-nums focus:border-slate-900 focus:outline-none"
+								/>
+							</div>
+						</div>
+						<p
+							data-testid="marketplace-fee-note"
+							data-marketplace-status={defaultMarketplace.fixedFeeUsd === null ? 'unpublished' : 'applied'}
+							class:list={[
+								'rounded-lg border px-3 py-2 text-xs leading-relaxed',
+								defaultMarketplace.fixedFeeUsd === null
+									? 'border-amber-300 bg-amber-50 text-amber-950'
+									: 'border-slate-200 bg-white text-slate-700',
+							]}
+						>
+							{defaultMarketplace.sourceNote}
+						</p>
+					</div>
+				)
+			}
+
 			<div
 				data-testid="winner-banner"
 				data-winner={initialSummary.bestProviderId}
@@ -383,6 +453,14 @@ const providerLabels: Record<string, string> = {
 							<span class="h-2.5 w-2.5 rounded-xs fee-bar-fx" aria-hidden="true"></span>
 							<span>Hidden FX Spread</span>
 						</span>
+						{
+							showMarketplace && (
+								<span class="inline-flex items-center gap-1.5">
+									<span class="h-2.5 w-2.5 rounded-xs fee-bar-marketplace" aria-hidden="true"></span>
+									<span>Marketplace withdrawal</span>
+								</span>
+							)
+						}
 					</div>
 				</div>
 
@@ -440,10 +518,23 @@ const providerLabels: Record<string, string> = {
 										<div class="fee-bar-segment fee-bar-seat" style={`width: ${seatPct.toFixed(2)}%`} />
 										<div class="fee-bar-segment fee-bar-rail" style={`width: ${railPct.toFixed(2)}%`} />
 										<div class="fee-bar-segment fee-bar-fx" style={`width: ${fxPct.toFixed(2)}%`} />
+										{
+											initialMarketplaceUsd > 0 && (
+												<div
+													class="fee-bar-segment fee-bar-marketplace"
+													style={`width: ${Math.min(100, Math.max(0, (initialMarketplaceUsd / initialMaxDragUsd) * 100)).toFixed(2)}%`}
+												/>
+											)
+										}
 									</div>
 
 									<p class="text-[11px] text-slate-600 tabular-nums">
 										Seat ${fmtUsd(seatPerInvoiceUsd)} | Rail ${fmtUsd(railFeeUsd)} | Hidden FX ${fmtUsd(fxLossUsd)} ({fxBps} bps spread)
+										{showMarketplace && initialSummary.marketplaceFeeDisclosure === 'applied'
+											? ` | Marketplace $${fmtUsd(initialMarketplaceUsd)}`
+											: showMarketplace
+												? ' | Marketplace fee not entered'
+												: ''}
 									</p>
 								</div>
 							);
@@ -513,6 +604,15 @@ const providerLabels: Record<string, string> = {
 					</tbody>
 				</table>
 			</div>
+			{
+				showMarketplace && (
+					<p data-marketplace-footnote class="text-xs leading-relaxed text-slate-600">
+						{initialSummary.marketplaceFeeDisclosure === 'applied'
+							? `Per-invoice drag includes a $${fmtUsd(initialMarketplaceUsd)} marketplace withdrawal fee, deducted before provider percentage fees.`
+							: 'Marketplace withdrawal fee is not entered. Per-invoice drag does not include one. A blank fee is not a published $0 charge.'}
+					</p>
+				)
+			}
 		</div>
 
 		<div data-panel="csv-batch" hidden={isCalculatorMode} class="space-y-6 p-4 sm:p-7 min-w-0">
@@ -747,6 +847,10 @@ const providerLabels: Record<string, string> = {
 		const feeBearerSelect = root.querySelector<HTMLSelectElement>('[data-field="fee-bearer"]');
 		const customMidRateInput = root.querySelector<HTMLInputElement>('[data-field="custom-mid-rate"]');
 		const midRateLabel = root.querySelector<HTMLElement>('[data-mid-rate-label]');
+		const marketplacePresetSelect = root.querySelector<HTMLSelectElement>('[data-field="marketplace-preset"]');
+		const marketplaceFeeInput = root.querySelector<HTMLInputElement>('[data-field="marketplace-fee"]');
+		const marketplaceNote = root.querySelector<HTMLElement>('[data-testid="marketplace-fee-note"]');
+		const marketplaceFootnote = root.querySelector<HTMLElement>('[data-marketplace-footnote]');
 
 		const winnerBanner = root.querySelector<HTMLElement>('[data-testid="winner-banner"]');
 		const winnerHeadline = root.querySelector<HTMLElement>('[data-winner-headline]');
@@ -803,6 +907,18 @@ const providerLabels: Record<string, string> = {
 			const customMidRate =
 				Number.isFinite(parsedMid) && parsedMid > 0 ? parsedMid : undefined;
 
+			let marketplaceWithdrawalFeeUsd: number | null | undefined;
+			if (marketplaceFeeInput) {
+				const rawFee = marketplaceFeeInput.value.trim();
+				if (rawFee.length === 0) {
+					marketplaceWithdrawalFeeUsd = null;
+				} else {
+					const parsedFee = Number(rawFee);
+					marketplaceWithdrawalFeeUsd =
+						Number.isFinite(parsedFee) && parsedFee >= 0 ? parsedFee : null;
+				}
+			}
+
 			return {
 				input: {
 					invoiceAmount,
@@ -812,6 +928,7 @@ const providerLabels: Record<string, string> = {
 					contractorCount,
 					payoutsPerMonth,
 					feeBearer,
+					...(marketplaceFeeInput ? { marketplaceWithdrawalFeeUsd } : {}),
 				},
 				customMidRate,
 			};
@@ -872,12 +989,21 @@ const providerLabels: Record<string, string> = {
 				breakEvenNote.textContent = summary.deelBreakEvenNote;
 			}
 
+			if (marketplaceFootnote) {
+				marketplaceFootnote.textContent =
+					summary.marketplaceFeeDisclosure === 'applied'
+						? `Per-invoice drag includes a $${formatCurrency(summary.marketplaceWithdrawalFeeUsd)} marketplace withdrawal fee, deducted before provider percentage fees.`
+						: 'Marketplace withdrawal fee is not entered. Per-invoice drag does not include one. A blank fee is not a published $0 charge.';
+			}
+
 			if (feeBarsList) {
 				const maxDragUsd = Math.max(
 					...summary.quotes.map((q) => q.totalFeeDragUsd),
 					0.01,
 				);
 				const seatDivisor = Math.max(1, input.contractorCount * input.payoutsPerMonth);
+				const marketplaceUsd =
+					summary.marketplaceFeeDisclosure === 'applied' ? summary.marketplaceWithdrawalFeeUsd : 0;
 
 				feeBarsList.innerHTML = summary.quotes
 					.map((quote, index) => {
@@ -888,6 +1014,7 @@ const providerLabels: Record<string, string> = {
 						const seatPct = Math.min(100, Math.max(0, (seatPerInvoiceUsd / maxDragUsd) * 100));
 						const railPct = Math.min(100, Math.max(0, (railFeeUsd / maxDragUsd) * 100));
 						const fxPct = Math.min(100, Math.max(0, (fxLossUsd / maxDragUsd) * 100));
+						const marketPct = Math.min(100, Math.max(0, (marketplaceUsd / maxDragUsd) * 100));
 						const totalBps = Math.round(quote.effectiveFeePct * 100);
 						const fxBps = Math.round(quote.fxSpreadPct * 100);
 						const rowBorderClass = isBest
@@ -913,8 +1040,9 @@ const providerLabels: Record<string, string> = {
 								<div class="fee-bar-segment fee-bar-seat" style="width: ${seatPct.toFixed(2)}%"></div>
 								<div class="fee-bar-segment fee-bar-rail" style="width: ${railPct.toFixed(2)}%"></div>
 								<div class="fee-bar-segment fee-bar-fx" style="width: ${fxPct.toFixed(2)}%"></div>
+								${marketplaceUsd > 0 ? `<div class="fee-bar-segment fee-bar-marketplace" style="width: ${marketPct.toFixed(2)}%"></div>` : ''}
 							</div>
-							<p class="text-[11px] text-slate-600 tabular-nums">Seat $${formatCurrency(seatPerInvoiceUsd)} | Rail $${formatCurrency(railFeeUsd)} | Hidden FX $${formatCurrency(fxLossUsd)} (${fxBps} bps spread)</p>
+							<p class="text-[11px] text-slate-600 tabular-nums">Seat $${formatCurrency(seatPerInvoiceUsd)} | Rail $${formatCurrency(railFeeUsd)} | Hidden FX $${formatCurrency(fxLossUsd)} (${fxBps} bps spread)${marketplaceFeeInput ? (summary.marketplaceFeeDisclosure === 'applied' ? ` | Marketplace $${formatCurrency(marketplaceUsd)}` : ' | Marketplace fee not entered') : ''}</p>
 						</div>`;
 					})
 					.join('');
@@ -970,6 +1098,48 @@ const providerLabels: Record<string, string> = {
 				});
 			});
 		}
+
+		function applyMarketplacePreset(): void {
+			if (!marketplacePresetSelect || !marketplaceFeeInput) return;
+			const option = marketplacePresetSelect.selectedOptions[0];
+			if (!option) return;
+			const specified = option.dataset.specified === 'true';
+			marketplaceFeeInput.value = specified ? (option.dataset.fee ?? '') : '';
+			if (marketplaceNote) {
+				marketplaceNote.textContent = option.dataset.note ?? '';
+				marketplaceNote.dataset.marketplaceStatus = specified ? 'applied' : 'unpublished';
+				marketplaceNote.className = specified
+					? 'rounded-lg border px-3 py-2 text-xs leading-relaxed border-slate-200 bg-white text-slate-700'
+					: 'rounded-lg border px-3 py-2 text-xs leading-relaxed border-amber-300 bg-amber-50 text-amber-950';
+			}
+		}
+
+		marketplacePresetSelect?.addEventListener('change', () => {
+			applyMarketplacePreset();
+			renderCalculator();
+		});
+
+		marketplaceFeeInput?.addEventListener('input', () => {
+			if (marketplaceNote && marketplaceFeeInput.value.trim().length > 0) {
+				const option = marketplacePresetSelect?.selectedOptions[0];
+				const presetNote = option?.dataset.note ?? '';
+				const typed = marketplaceFeeInput.value.trim();
+				marketplaceNote.textContent =
+					option?.dataset.specified === 'true'
+						? presetNote
+						: `Using $${typed} because you typed it. ${presetNote}`;
+				marketplaceNote.dataset.marketplaceStatus = 'applied';
+				marketplaceNote.className =
+					'rounded-lg border px-3 py-2 text-xs leading-relaxed border-slate-200 bg-white text-slate-700';
+			} else if (marketplaceNote && marketplacePresetSelect) {
+				const option = marketplacePresetSelect.selectedOptions[0];
+				marketplaceNote.textContent = option?.dataset.note ?? '';
+				marketplaceNote.dataset.marketplaceStatus = 'unpublished';
+				marketplaceNote.className =
+					'rounded-lg border px-3 py-2 text-xs leading-relaxed border-amber-300 bg-amber-50 text-amber-950';
+			}
+			renderCalculator();
+		});
 
 		const calcControls = [
 			amountInput,

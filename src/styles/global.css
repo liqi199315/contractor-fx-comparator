@@ -126,6 +126,10 @@
 	background-color: #e11d48;
 }
 
+.fee-bar-marketplace {
+	background-color: #0f766e;
+}
+
 .bps-badge {
 	display: inline-flex;
 	align-items: center;

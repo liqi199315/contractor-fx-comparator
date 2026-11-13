@@ -42,6 +42,99 @@ function fmtMoney(value: number): string {
 	<div class="space-y-10 min-w-0">
 		<FxComparatorWorkbench preset={preset} />
 
+		{
+			(preset.workedExample || preset.feeSources || preset.auditCallout) && (
+				<section class="fintech-card rounded-2xl p-6 sm:p-8 space-y-6">
+					<div class="space-y-2">
+						<p class="text-xs font-bold uppercase tracking-wider text-emerald-800">
+							Sources, formula, and a worked example
+						</p>
+						<h2 class="text-xl font-bold text-slate-900 sm:text-2xl">
+							{preset.workedExample?.heading ?? 'Published fee sources'}
+						</h2>
+					</div>
+
+					{
+						preset.auditCallout && (
+							<p class="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
+								{preset.auditCallout}
+							</p>
+						)
+					}
+
+					{
+						preset.workedExample && (
+							<div class="space-y-3">
+								<p class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs font-semibold text-slate-900 sm:text-sm">
+									{preset.workedExample.formula}
+								</p>
+								<ol class="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-slate-700">
+									{preset.workedExample.steps.map((step) => (
+										<li>{step}</li>
+									))}
+								</ol>
+							</div>
+						)
+					}
+
+					{
+						preset.feeSources && preset.feeSources.length > 0 && (
+							<div class="space-y-3">
+								<h3 class="text-base font-bold text-slate-900">Fee sources and verification dates</h3>
+								<div class="overflow-x-auto rounded-xl border border-slate-200">
+									<table class="min-w-full divide-y divide-slate-200 text-left text-xs sm:text-sm">
+										<thead class="bg-slate-50 font-semibold uppercase tracking-wide text-slate-600">
+											<tr>
+												<th scope="col" class="px-3 py-3">Source</th>
+												<th scope="col" class="px-3 py-3">Verified</th>
+												<th scope="col" class="px-3 py-3">What it states</th>
+											</tr>
+										</thead>
+										<tbody class="divide-y divide-slate-200 bg-white text-slate-700">
+											{preset.feeSources.map((source) => (
+												<tr>
+													<td class="px-3 py-3 align-top">
+														<p class="font-semibold text-slate-900">{source.publisher}</p>
+														<a
+															href={source.url}
+															class="mt-1 inline-block font-medium text-slate-900 underline hover:text-emerald-800 break-all"
+															{...(source.url.startsWith('http')
+																? { target: '_blank', rel: 'noopener noreferrer' }
+																: {})}
+														>
+															{source.pageTitle}
+														</a>
+													</td>
+													<td class="px-3 py-3 align-top whitespace-nowrap tabular-nums">
+														{source.verifiedOn}
+													</td>
+													<td class="px-3 py-3 align-top leading-relaxed">{source.finding}</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						)
+					}
+
+					{
+						preset.relatedLinks && preset.relatedLinks.length > 0 && (
+							<ul class="flex flex-col gap-2 text-sm font-medium text-slate-800">
+								{preset.relatedLinks.map((link) => (
+									<li>
+										<a href={link.href} class="underline hover:text-emerald-800">
+											{link.label}
+										</a>
+									</li>
+								))}
+							</ul>
+						)
+					}
+				</section>
+			)
+		}
+
 		<section class="fintech-card rounded-2xl p-6 sm:p-8 space-y-6">
 			<div class="space-y-2">
 				<p class="text-xs font-bold uppercase tracking-wider text-emerald-800">

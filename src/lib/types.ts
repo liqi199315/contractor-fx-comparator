@@ -2,7 +2,7 @@ export type BillingCurrency = 'USD' | 'EUR' | 'GBP';
 
 export type PayoutCurrency = 'EUR' | 'GBP' | 'INR' | 'PHP' | 'BRL' | 'MXN' | 'CNY' | 'CAD';
 
-export type FundingMethod = 'ach-bank' | 'wire' | 'card';
+export type FundingMethod = 'ach-bank' | 'wire' | 'card' | 'received-balance';
 
 export type FeeBearer = 'contractor' | 'client';
 
@@ -16,6 +16,12 @@ export interface PayoutScenarioInput {
 	contractorCount: number;
 	payoutsPerMonth: number;
 	feeBearer: FeeBearer;
+	/**
+	 * Marketplace cash-out fee in USD, deducted before provider percentage fees.
+	 * Omit on pages that do not ask for it. `null` means the control is visible
+	 * and the reader has not entered a figure (do not treat that as a published $0).
+	 */
+	marketplaceWithdrawalFeeUsd?: number | null;
 }
 
 export interface ProviderQuote {
@@ -34,6 +40,8 @@ export interface ProviderQuote {
 	notes: string;
 }
 
+export type MarketplaceFeeDisclosure = 'omitted' | 'not-entered' | 'applied';
+
 export interface ComparisonSummary {
 	midMarketRate: number;
 	grossInvoiceUsdEquivalent: number;
@@ -42,6 +50,8 @@ export interface ComparisonSummary {
 	worstProviderId: ProviderId;
 	annualSavingsBestVsWorstUsd: number;
 	deelBreakEvenNote: string;
+	marketplaceWithdrawalFeeUsd: number;
+	marketplaceFeeDisclosure: MarketplaceFeeDisclosure;
 }
 
 export interface BatchCsvRowResult {
@@ -70,6 +80,25 @@ export interface RouteFaqItem {
 	answer: string;
 }
 
+export interface FeeSourceCitation {
+	publisher: string;
+	pageTitle: string;
+	url: string;
+	verifiedOn: string;
+	finding: string;
+}
+
+export interface WorkedExampleBlock {
+	heading: string;
+	formula: string;
+	steps: string[];
+}
+
+export interface RelatedCalculatorLink {
+	href: string;
+	label: string;
+}
+
 export interface FxRoutePreset {
 	slug: string;
 	path: string;
@@ -83,4 +112,10 @@ export interface FxRoutePreset {
 	mode: 'calculator' | 'csv-batch';
 	methodologyNotes: string[];
 	faqs: RouteFaqItem[];
+	feeSources?: FeeSourceCitation[];
+	workedExample?: WorkedExampleBlock;
+	auditCallout?: string;
+	relatedLinks?: RelatedCalculatorLink[];
+	marketplacePresetIds?: string[];
+	defaultMarketplacePresetId?: string;
 }

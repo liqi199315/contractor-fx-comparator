@@ -370,5 +370,90 @@ describe('fx-engine', () => {
 		expect(markdown).toContain('8 contractor(s)');
 		expect(markdown).toContain('| Provider | Monthly SaaS (USD) |');
 		expect(markdown).not.toMatch(/[\u2013\u2014]/);
+		expect(markdown).not.toContain('Marketplace withdrawal fee');
+	});
+
+	it('leaves existing totals unchanged when the marketplace fee is omitted', () => {
+		const summary = comparePayoutProviders({
+			...BASE_USD_INR_INPUT,
+			invoiceAmount: 1000,
+		});
+		expect(summary.marketplaceFeeDisclosure).toBe('omitted');
+		expect(summary.marketplaceWithdrawalFeeUsd).toBe(0);
+		const wise = summary.quotes.find((quote) => quote.providerId === 'wise')!;
+		expect(wise.totalFeeDragUsd).toBe(9.45);
+	});
+
+	it('deducts a marketplace withdrawal fee before percentage FX and labels a blank fee as not entered', () => {
+		const applied = comparePayoutProviders({
+			invoiceAmount: 200,
+			billingCurrency: 'USD',
+			payoutCurrency: 'INR',
+			fundingMethod: 'received-balance',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+			marketplaceWithdrawalFeeUsd: 3,
+		});
+		expect(applied.marketplaceFeeDisclosure).toBe('applied');
+		expect(applied.marketplaceWithdrawalFeeUsd).toBe(3);
+		const wise = applied.quotes.find((quote) => quote.providerId === 'wise')!;
+		const payoneer = applied.quotes.find((quote) => quote.providerId === 'payoneer')!;
+		expect(wise.fundingFeeUsd).toBe(0);
+		expect(wise.fxLossUsd).toBe(0.95);
+		expect(wise.totalFeeDragUsd).toBe(3.95);
+		expect(payoneer.fundingFeeUsd).toBe(0);
+		expect(payoneer.fxLossUsd).toBe(4.43);
+		expect(payoneer.totalFeeDragUsd).toBe(7.43);
+
+		const blank = comparePayoutProviders({
+			invoiceAmount: 800,
+			billingCurrency: 'USD',
+			payoutCurrency: 'PHP',
+			fundingMethod: 'received-balance',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+			marketplaceWithdrawalFeeUsd: null,
+		});
+		expect(blank.marketplaceFeeDisclosure).toBe('not-entered');
+		expect(blank.marketplaceWithdrawalFeeUsd).toBe(0);
+		const memo = exportComparisonReport(
+			{
+				invoiceAmount: 800,
+				billingCurrency: 'USD',
+				payoutCurrency: 'PHP',
+				fundingMethod: 'received-balance',
+				contractorCount: 1,
+				payoutsPerMonth: 1,
+				feeBearer: 'contractor',
+				marketplaceWithdrawalFeeUsd: null,
+			},
+			blank,
+			'md',
+		);
+		expect(memo).toContain('Marketplace withdrawal fee: not entered');
+		expect(memo).not.toMatch(/[\u2013\u2014]/);
+	});
+
+	it('zeros new funding fees on an already received balance without dropping the SWIFT correspondent fee', () => {
+		const summary = comparePayoutProviders({
+			invoiceAmount: 1000,
+			billingCurrency: 'USD',
+			payoutCurrency: 'INR',
+			fundingMethod: 'received-balance',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+		});
+		const byId = Object.fromEntries(summary.quotes.map((quote) => [quote.providerId, quote]));
+		expect(byId.wise!.fundingFeeUsd).toBe(0);
+		expect(byId.wise!.fxLossUsd).toBe(4.8);
+		expect(byId.wise!.totalFeeDragUsd).toBe(4.8);
+		expect(byId.payoneer!.fundingFeeUsd).toBe(0);
+		expect(byId.payoneer!.fxLossUsd).toBe(22.5);
+		expect(byId['swift-wire']!.fundingFeeUsd).toBe(0);
+		expect(byId['swift-wire']!.withdrawalFixedFeeUsd).toBe(15);
+		expect(byId.deel!.withdrawalFixedFeeUsd).toBe(0);
 	});
 });

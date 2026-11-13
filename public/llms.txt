@@ -14,6 +14,11 @@ Rate methodology and independence disclaimer: Independent fee modeling tool; not
 - [Deel vs Wise Contractor Payouts](https://contractorfx.com/deel-vs-wise-contractor-payouts/): 8-contractor USD to EUR team payout benchmark with downloadable CFO routing memos.
 - [Deel Withdrawal Fee Calculator](https://contractorfx.com/deel-withdrawal-fee-calculator/): Contractor cash-out deduction model for $3,000 USD to MXN across wire and local rails.
 - [Batch Contractor Payout CSV Audit](https://contractorfx.com/batch-contractor-payout-csv-audit/): Client-side multi-corridor CSV roster fee auditor computing monthly and 12-month team FX savings.
+- [FX Markup Calculator](https://contractorfx.com/fx-markup-calculator/): Receipt formula spread = (mid rate - actual rate) / mid rate, with a worked 250 bps example and local memo export. Default $1,000 USD to EUR.
+- [Payoneer Fees Calculator India](https://contractorfx.com/payoneer-fees-calculator-india/): Indian payee page for a USD balance withdrawn to INR. Official India pricing band is 1% to 4%. Verified 2026-11-13.
+- [Wise vs Payoneer Philippines](https://contractorfx.com/wise-vs-payoneer-philippines/): Philippines virtual assistant payee page for a $1,200 USD to PHP retainer. Payoneer conversion band is 1.2% to 4%.
+- [Fiverr Payoneer Withdrawal Fee](https://contractorfx.com/fiverr-payoneer-withdrawal-fee/): Stacks the published $3.00 Fiverr Payoneer Account withdrawal fee. Local-currency bank fee is left blank where Fiverr help articles disagree.
+- [Upwork Withdrawal Fee to Payoneer](https://contractorfx.com/upwork-withdrawal-fee-payoneer/): Upwork Payoneer dollar fee is not published on the help page checked 2026-11-13. Direct to Local Bank is the published $0.99 preset.
 
 ## Methodology, Privacy, and Governance
 

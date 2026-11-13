@@ -34,7 +34,7 @@ interface ProviderPricingModel {
 		isSameCurrency: boolean,
 	) => number;
 	crossCurrencySpreadPct: number;
-	buildNotes: (isSameCurrency: boolean) => string;
+	buildNotes: (isSameCurrency: boolean, fundingMethod: FundingMethod) => string;
 }
 
 const PROVIDER_MODELS: readonly ProviderPricingModel[] = [
@@ -43,24 +43,30 @@ const PROVIDER_MODELS: readonly ProviderPricingModel[] = [
 		providerName: 'Wise Business',
 		seatFeePerContractorUsd: 0,
 		computeFundingFeeUsd: (grossUsd, method) => {
-			if (grossUsd <= 0) return 0;
+			if (grossUsd <= 0 || method === 'received-balance') return 0;
 			if (method === 'ach-bank') return grossUsd * 0.0043 + 0.35;
 			if (method === 'wire') return 6.11 + grossUsd * 0.0043;
 			return grossUsd * 0.029 + 0.3;
 		},
 		computeWithdrawalFixedFeeUsd: () => 0,
 		crossCurrencySpreadPct: 0.48,
-		buildNotes: (isSameCurrency) =>
-			isSameCurrency
+		buildNotes: (isSameCurrency, fundingMethod) => {
+			if (fundingMethod === 'received-balance') {
+				return isSameCurrency
+					? 'Balance already received: $0 new funding fee, 0% FX markup, and $0 monthly seat cost.'
+					: 'Balance already received: $0 new funding fee. The 0.48% figure is this site FX model, not a live Wise quote.';
+			}
+			return isSameCurrency
 				? 'Same-currency local bank transfer with 0% FX conversion markup and $0 monthly seat cost.'
-				: 'Mid-market exchange rate with a transparent 0.48% conversion fee and $0 monthly seat cost.',
+				: 'Mid-market exchange rate with a transparent 0.48% conversion fee and $0 monthly seat cost.';
+		},
 	},
 	{
 		providerId: 'payoneer',
 		providerName: 'Payoneer',
 		seatFeePerContractorUsd: 0,
 		computeFundingFeeUsd: (grossUsd, method) => {
-			if (grossUsd <= 0) return 0;
+			if (grossUsd <= 0 || method === 'received-balance') return 0;
 			if (method === 'ach-bank') return grossUsd * 0.01;
 			if (method === 'wire') return 15;
 			return grossUsd * 0.03;
@@ -70,57 +76,84 @@ const PROVIDER_MODELS: readonly ProviderPricingModel[] = [
 			return Math.max(1.5, grossUsd * 0.02);
 		},
 		crossCurrencySpreadPct: 2.25,
-		buildNotes: (isSameCurrency) =>
-			isSameCurrency
+		buildNotes: (isSameCurrency, fundingMethod) => {
+			if (fundingMethod === 'received-balance') {
+				return isSameCurrency
+					? 'Balance already received: 0% FX spread, with the 2% same-currency bank withdrawal fee ($1.50 minimum).'
+					: 'Balance already received: $0 new client funding fee. Cross-currency loss uses this site 2.25% FX model, not a Payoneer-published point rate.';
+			}
+			return isSameCurrency
 				? '0% FX spread with a 2% same-currency bank withdrawal fee ($1.50 minimum) and $0 seat cost.'
-				: '$0 monthly seat fee, client funding fee plus ~2.25% hidden FX spread above mid-market.',
+				: '$0 monthly seat fee, client funding fee plus ~2.25% hidden FX spread above mid-market.';
+		},
 	},
 	{
 		providerId: 'deel',
 		providerName: 'Deel',
 		seatFeePerContractorUsd: 49,
 		computeFundingFeeUsd: (grossUsd, method) => {
-			if (grossUsd <= 0) return 0;
+			if (grossUsd <= 0 || method === 'received-balance') return 0;
 			if (method === 'card') return grossUsd * 0.035;
 			return 0;
 		},
 		computeWithdrawalFixedFeeUsd: (grossUsd, method) => {
-			if (grossUsd <= 0 || method === 'ach-bank') return 0;
+			if (grossUsd <= 0 || method === 'ach-bank' || method === 'received-balance') return 0;
 			return 5;
 		},
 		crossCurrencySpreadPct: 1.5,
-		buildNotes: (isSameCurrency) =>
-			isSameCurrency
+		buildNotes: (isSameCurrency, fundingMethod) => {
+			if (fundingMethod === 'received-balance') {
+				return isSameCurrency
+					? 'Balance already received: $49/contractor monthly seat still applies, with 0% FX spread.'
+					: 'Balance already received: $49/contractor monthly seat plus this site 1.50% FX model.';
+			}
+			return isSameCurrency
 				? '$49/contractor monthly SaaS seat fee with 0% FX spread on same-currency withdrawals.'
-				: '$49/contractor monthly SaaS seat fee plus ~1.5% contractor withdrawal FX spread.',
+				: '$49/contractor monthly SaaS seat fee plus ~1.5% contractor withdrawal FX spread.';
+		},
 	},
 	{
 		providerId: 'remote',
 		providerName: 'Remote',
 		seatFeePerContractorUsd: 29,
 		computeFundingFeeUsd: (grossUsd, method) => {
-			if (grossUsd <= 0) return 0;
+			if (grossUsd <= 0 || method === 'received-balance') return 0;
 			if (method === 'card') return grossUsd * 0.035;
 			return 0;
 		},
 		computeWithdrawalFixedFeeUsd: () => 0,
 		crossCurrencySpreadPct: 1.25,
-		buildNotes: (isSameCurrency) =>
-			isSameCurrency
+		buildNotes: (isSameCurrency, fundingMethod) => {
+			if (fundingMethod === 'received-balance') {
+				return isSameCurrency
+					? 'Balance already received: $29/contractor monthly seat still applies, with 0% FX spread.'
+					: 'Balance already received: $29/contractor monthly seat plus this site 1.25% FX model.';
+			}
+			return isSameCurrency
 				? '$29/contractor monthly SaaS seat fee with $0 ACH funding and 0% same-currency FX spread.'
-				: '$29/contractor monthly SaaS seat fee plus ~1.25% FX conversion spread on payouts.',
+				: '$29/contractor monthly SaaS seat fee plus ~1.25% FX conversion spread on payouts.';
+		},
 	},
 	{
 		providerId: 'swift-wire',
 		providerName: 'Traditional Bank SWIFT',
 		seatFeePerContractorUsd: 0,
-		computeFundingFeeUsd: (grossUsd) => (grossUsd > 0 ? 35 : 0),
+		computeFundingFeeUsd: (grossUsd, method) => {
+			if (grossUsd <= 0 || method === 'received-balance') return 0;
+			return 35;
+		},
 		computeWithdrawalFixedFeeUsd: (grossUsd) => (grossUsd > 0 ? 15 : 0),
 		crossCurrencySpreadPct: 2.6,
-		buildNotes: (isSameCurrency) =>
-			isSameCurrency
+		buildNotes: (isSameCurrency, fundingMethod) => {
+			if (fundingMethod === 'received-balance') {
+				return isSameCurrency
+					? 'Balance already received: the $35 outgoing wire is not applied. This model still includes the $15 correspondent fee and 0% FX spread.'
+					: 'Balance already received: the $35 outgoing wire is not applied. This model still includes the $15 correspondent fee and the 2.60% FX desk assumption.';
+			}
+			return isSameCurrency
 				? '$35 outgoing bank wire plus $15 correspondent bank fee ($50 fixed rail bite) and 0% FX spread.'
-				: '$35 outgoing wire plus $15 correspondent bank fee ($50 fixed rail bite) and 2.6% bank FX desk spread.',
+				: '$35 outgoing wire plus $15 correspondent bank fee ($50 fixed rail bite) and 2.6% bank FX desk spread.';
+		},
 	},
 ];
 
@@ -211,6 +244,18 @@ export function comparePayoutProviders(
 	const billingPerUsd = REFERENCE_USD_RATES[input.billingCurrency];
 	const rawGrossUsd = invoiceAmount / billingPerUsd;
 
+	const feeField = input.marketplaceWithdrawalFeeUsd;
+	const marketplaceFeeDisclosure: ComparisonSummary['marketplaceFeeDisclosure'] =
+		feeField === undefined
+			? 'omitted'
+			: feeField === null || !Number.isFinite(feeField)
+				? 'not-entered'
+				: 'applied';
+	const requestedMarketplaceFeeUsd =
+		marketplaceFeeDisclosure === 'applied' ? Math.max(0, feeField as number) : 0;
+	const marketplaceWithdrawalFeeUsd = Math.min(rawGrossUsd, requestedMarketplaceFeeUsd);
+	const principalUsd = Math.max(0, rawGrossUsd - marketplaceWithdrawalFeeUsd);
+
 	const hasCustomMidRate =
 		customMidRate !== undefined && Number.isFinite(customMidRate) && customMidRate > 0;
 	const rawMidMarketRate = hasCustomMidRate
@@ -225,17 +270,21 @@ export function comparePayoutProviders(
 		const platformMonthlyUsd = round2(model.seatFeePerContractorUsd * contractorCount);
 		const proratedSeatPerInvoiceUsd = model.seatFeePerContractorUsd / payoutsPerMonth;
 
-		const rawFundingFeeUsd = model.computeFundingFeeUsd(rawGrossUsd, input.fundingMethod);
+		const rawFundingFeeUsd = model.computeFundingFeeUsd(principalUsd, input.fundingMethod);
 		const rawWithdrawalFeeUsd = model.computeWithdrawalFixedFeeUsd(
-			rawGrossUsd,
+			principalUsd,
 			input.fundingMethod,
 			isSameCurrency,
 		);
 		const fxSpreadPct = isSameCurrency ? 0 : model.crossCurrencySpreadPct;
-		const rawFxLossUsd = rawGrossUsd * (fxSpreadPct / 100);
+		const rawFxLossUsd = principalUsd * (fxSpreadPct / 100);
 
 		const unroundedPerInvoiceDragUsd =
-			proratedSeatPerInvoiceUsd + rawFundingFeeUsd + rawWithdrawalFeeUsd + rawFxLossUsd;
+			marketplaceWithdrawalFeeUsd +
+			proratedSeatPerInvoiceUsd +
+			rawFundingFeeUsd +
+			rawWithdrawalFeeUsd +
+			rawFxLossUsd;
 		const totalFeeDragUsd = round2(unroundedPerInvoiceDragUsd);
 		const annualFeeDragUsd = round2(
 			unroundedPerInvoiceDragUsd * payoutsPerMonth * contractorCount * 12,
@@ -244,7 +293,7 @@ export function comparePayoutProviders(
 			rawGrossUsd > 0 ? round2((unroundedPerInvoiceDragUsd / rawGrossUsd) * 100) : 0;
 
 		const netUsdReachingContractor = computeNetUsdReachingContractor(
-			rawGrossUsd,
+			principalUsd,
 			rawFundingFeeUsd,
 			rawWithdrawalFeeUsd,
 			rawFxLossUsd,
@@ -270,7 +319,7 @@ export function comparePayoutProviders(
 			netReceivedTargetCurrency,
 			effectiveExchangeRate,
 			annualFeeDragUsd,
-			notes: model.buildNotes(isSameCurrency),
+			notes: model.buildNotes(isSameCurrency, input.fundingMethod),
 		};
 	});
 
@@ -287,6 +336,8 @@ export function comparePayoutProviders(
 		worstProviderId: worstQuote.providerId,
 		annualSavingsBestVsWorstUsd: round2(worstQuote.annualFeeDragUsd - bestQuote.annualFeeDragUsd),
 		deelBreakEvenNote: buildDeelBreakEvenNote(quotes, contractorCount),
+		marketplaceWithdrawalFeeUsd: round2(marketplaceWithdrawalFeeUsd),
+		marketplaceFeeDisclosure,
 	};
 }
 
@@ -522,6 +573,8 @@ export function exportComparisonReport(
 			'effective_exchange_rate',
 			'annual_fee_drag_usd',
 			'notes',
+			'marketplace_withdrawal_fee_usd',
+			'marketplace_fee_status',
 		];
 
 		const csvRows = summary.quotes.map((quote) =>
@@ -547,6 +600,10 @@ export function exportComparisonReport(
 				quote.effectiveExchangeRate,
 				quote.annualFeeDragUsd.toFixed(2),
 				quote.notes,
+				summary.marketplaceFeeDisclosure === 'applied'
+					? summary.marketplaceWithdrawalFeeUsd.toFixed(2)
+					: '',
+				summary.marketplaceFeeDisclosure,
 			]
 				.map(escapeCsvCell)
 				.join(','),
@@ -568,6 +625,13 @@ export function exportComparisonReport(
 		`- Funding Rail: ${input.fundingMethod}`,
 		`- Team Footprint: ${input.contractorCount} contractor(s), ${input.payoutsPerMonth} payout(s) per month`,
 		`- Fee Bearer: ${input.feeBearer}`,
+		...(summary.marketplaceFeeDisclosure === 'omitted'
+			? []
+			: [
+					summary.marketplaceFeeDisclosure === 'applied'
+						? `- Marketplace withdrawal fee: $${formatMoney(summary.marketplaceWithdrawalFeeUsd)} USD, deducted before provider percentage fees`
+						: '- Marketplace withdrawal fee: not entered, so $0.00 was applied. Do not read a blank fee as a published zero charge',
+				]),
 		'',
 		'## Executive Recommendation',
 		`- Optimal Provider: ${bestQuote.providerName} ($${formatMoney(bestQuote.totalFeeDragUsd)} per invoice, $${formatMoney(bestQuote.annualFeeDragUsd)}/year)`,

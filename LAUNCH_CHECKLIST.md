@@ -27,8 +27,8 @@ Confirm all four stages pass with zero errors:
 
 1. `npm test` passes all 27 Vitest calculation, CSV parser, and standalone CLI unit tests.
 2. `npm run build` compiles all 9 content routes (6 calculator routes plus `/about/`, `/privacy/`, `/terms/`), bundles `bin/contractor-fx.mjs`, and copies static assets into `dist/`.
-3. `npm run seo:check` validates `dist/` against `https://contractorfx.com`, confirming all 9 routes and 11 required static artifacts (`404.html`, `sitemap-index.xml`, `robots.txt`, `llms.txt`, `_headers`, `og-image.svg`, `og-image.png`, `github-social-preview.png`, `site.webmanifest`, `indexnow-key.txt`, `b7e3d1c84a924f508c6e23b9a1d05e42.txt`), valid PNG magic bytes and minimum 5 KB size, exact canonical URLs, `Organization`/`BreadcrumbList`/`WebApplication`/`FAQPage` JSON-LD, internal link resolution, preview domain `noindex` headers, and zero placeholders or dashes.
-4. `npm run test:e2e` passes all 6 Playwright Chromium specs, including local `window.dataLayer` funnel tracking (`config` and `payout_calc_export` with 0 external requests) and `375x812` mobile layout verification.
+3. `npm run seo:check` validates `dist/` against `https://contractorfx.com`, confirming all 14 routes and 11 required static artifacts (`404.html`, `sitemap-index.xml`, `robots.txt`, `llms.txt`, `_headers`, `og-image.svg`, `og-image.png`, `github-social-preview.png`, `site.webmanifest`, `indexnow-key.txt`, `b7e3d1c84a924f508c6e23b9a1d05e42.txt`), valid PNG magic bytes and minimum 5 KB size, exact canonical URLs, `Organization`/`BreadcrumbList`/`WebApplication`/`FAQPage` JSON-LD, internal link resolution, preview domain `noindex` headers, and zero placeholders or dashes.
+4. `npm run test:e2e` passes all 7 Playwright Chromium specs, including local `window.dataLayer` funnel tracking (`config` and `payout_calc_export` with 0 external requests) and `375x812` mobile layout verification.
 
 ## 2. Register `contractorfx.com` and configure zone via automated bootstrap (`[人工]`)
 

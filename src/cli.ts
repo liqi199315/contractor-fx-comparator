@@ -64,7 +64,12 @@ function normalizeFunding(value: string): FundingMethod {
 	if (lowered === 'card') {
 		return 'card';
 	}
-	throw new Error(`Unsupported funding method "${value}". Supported: ach, wire, card.`);
+	if (lowered === 'balance' || lowered === 'received-balance' || lowered === 'received') {
+		return 'received-balance';
+	}
+	throw new Error(
+		`Unsupported funding method "${value}". Supported: ach, wire, card, received-balance.`,
+	);
 }
 
 function normalizeBilling(value: string): BillingCurrency {

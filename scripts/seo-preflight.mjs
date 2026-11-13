@@ -43,6 +43,36 @@ function buildContentRoutes(origin = SITE_ORIGIN) {
 			kind: 'tool',
 		},
 		{
+			route: '/fx-markup-calculator/',
+			file: 'fx-markup-calculator/index.html',
+			canonical: `${origin}/fx-markup-calculator/`,
+			kind: 'tool',
+		},
+		{
+			route: '/payoneer-fees-calculator-india/',
+			file: 'payoneer-fees-calculator-india/index.html',
+			canonical: `${origin}/payoneer-fees-calculator-india/`,
+			kind: 'tool',
+		},
+		{
+			route: '/wise-vs-payoneer-philippines/',
+			file: 'wise-vs-payoneer-philippines/index.html',
+			canonical: `${origin}/wise-vs-payoneer-philippines/`,
+			kind: 'tool',
+		},
+		{
+			route: '/fiverr-payoneer-withdrawal-fee/',
+			file: 'fiverr-payoneer-withdrawal-fee/index.html',
+			canonical: `${origin}/fiverr-payoneer-withdrawal-fee/`,
+			kind: 'tool',
+		},
+		{
+			route: '/upwork-withdrawal-fee-payoneer/',
+			file: 'upwork-withdrawal-fee-payoneer/index.html',
+			canonical: `${origin}/upwork-withdrawal-fee-payoneer/`,
+			kind: 'tool',
+		},
+		{
 			route: '/about/',
 			file: 'about/index.html',
 			canonical: `${origin}/about/`,
