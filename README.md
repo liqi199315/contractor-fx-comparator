@@ -123,7 +123,7 @@ npm run cf:preview
 - `npm run dev` starts the local Astro server at `http://127.0.0.1:4326`.
 - `npm test` runs the Vitest unit test suite covering `src/lib/fx-engine.ts` and `bin/contractor-fx.mjs`.
 - `npm run build` compiles all nine static routes, builds the standalone CLI, and outputs to `dist/`.
-- `npm run seo:check` runs `scripts/seo-preflight.mjs` against `dist/` (default origin `https://contractorfx.com`) to verify all routes, auxiliary static assets, unique `<title>` and `<meta name="description">`, exact canonical URLs, valid PNG `og:image` tags and binary magic bytes, single `<h1>`, `Organization` and `BreadcrumbList` JSON-LD plus `WebApplication` and `FAQPage` on all six calculator routes, internal link resolution, preview domain `noindex` headers, and zero placeholders or long dashes.
+- `npm run seo:check` runs `scripts/seo-preflight.mjs` against `dist/` (default origin `https://contractorfx.com`) to verify all routes, auxiliary static assets, unique `<title>` and `<meta name="description">`, exact canonical URLs, valid PNG `og:image` tags and binary magic bytes, single `<h1>`, `Organization` and `BreadcrumbList` JSON-LD plus `WebApplication` and `FAQPage` on every calculator route, internal link resolution, preview domain `noindex` headers, and zero placeholders or long dashes.
 - `npm run test:e2e` starts `npm run preview` on `http://127.0.0.1:4326/` and runs all six Chromium specs in `tests/e2e/comparator.spec.ts`, including GA4 `window.dataLayer` verification with zero external requests and `375x812` mobile viewport responsiveness across trust pages.
 - `npm run verify:all` runs unit tests, static build, SEO preflight, and Playwright E2E in sequence.
 

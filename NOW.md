@@ -18,20 +18,25 @@
 
 - **计算与比较类型契约（`src/lib/types.ts`）**：定义 `BillingCurrency`、`PayoutCurrency`、`FundingMethod`、`FeeBearer`、`ProviderId`（wise / payoneer / deel / remote / swift-wire）、`PayoutScenarioInput`、`ProviderQuote`、`ComparisonSummary`、`BatchCsvRowResult`、`BatchAuditResult`、`FxRoutePreset` 等强类型结构。
 - **透明费率计算与 CSV 审计引擎（`src/lib/fx-engine.ts`、`src/lib/sample-csv.ts`）**：建模 Wise Business、Payoneer、Deel、Remote、传统 SWIFT 电汇的月度席位费、入金通道费、固定提现费与汇率点差损耗，支持单笔及 12 个月多承包商折算、零上传团队 CSV 批量审计与 CFO 级 Markdown/CSV 备忘录导出。
-- **9 个静态内容路由（6 个工具页 + 3 个联盟合规信任页）**：
+- **14 个静态内容路由（11 个工具页 + 3 个联盟合规信任页）**：
   1. `/`（Wise vs Payoneer 综合国际结算计算器，默认 3,500 USD -> INR）
   2. `/wise-vs-payoneer-fee-calculator/`（Wise vs Payoneer 细分手续费对比，默认 2,000 USD -> PHP）
   3. `/deel-vs-remote-contractor-calculator/`（Deel vs Remote 承包商成本对比，默认 4,500 USD -> BRL，5 人团队）
   4. `/deel-vs-wise-contractor-payouts/`（Deel vs Wise 团队薪酬支出对比，默认 5,000 USD -> EUR，8 人团队）
   5. `/deel-withdrawal-fee-calculator/`（Deel 提现与汇率损耗计算器，默认 3,000 USD -> MXN 电汇）
   6. `/batch-contractor-payout-csv-audit/`（团队批量薪酬 CSV 隐形磨损审计，默认 6 人跨国团队）
-  7. `/about/`（编辑政策与费率建模方法论：公开费率来源、中间价点差公式、季度复核机制、非官方关联声明与 `hello@contractorfx.com` 联系方式）
-  8. `/privacy/`（零上传隐私保证：明确账单与团队 CSV 永不离开浏览器、匿名化 GA4 事件策略、GDPR 与 CCPA/CPRA 披露）
-  9. `/terms/`（使用条款与免责声明：非财务/税务/法律建议声明、实时通道与 KYC 分层费率差异说明、FTC `16 CFR Part 255` 联盟披露规范）
+  7. `/fx-markup-calculator/`（汇率加点公式页，默认 1,000 USD -> EUR。公式 spread = (mid rate - actual rate) / mid rate）
+  8. `/payoneer-fees-calculator-india/`（印度收款人 USD -> INR。Payoneer India 公开带宽 1% 至 4%，核验日 2026-11-13）
+  9. `/wise-vs-payoneer-philippines/`（菲律宾 VA 收款人页，默认 1,200 USD -> PHP）
+  10. `/fiverr-payoneer-withdrawal-fee/`（Fiverr 提到 Payoneer Account 的公开手续费 $3.00。本地币银行转账两篇帮助文章不一致，因此不自动填数）
+  11. `/upwork-withdrawal-fee-payoneer/`（Upwork 到 Payoneer 的美元手续费公开帮助页未给出。Direct to Local Bank 使用已公布的 $0.99）
+  12. `/about/`（编辑政策与费率建模方法论：公开费率来源、中间价点差公式、季度复核机制、非官方关联声明与 `hello@contractorfx.com` 联系方式）
+  13. `/privacy/`（零上传隐私保证：明确账单与团队 CSV 永不离开浏览器、匿名化 GA4 事件策略、GDPR 与 CCPA/CPRA 披露）
+  14. `/terms/`（使用条款与免责声明：非财务/税务/法律建议声明、实时通道与 KYC 分层费率差异说明、FTC `16 CFR Part 255` 联盟披露规范）
 - **独立 Node ESM CLI（`bin/contractor-fx.mjs`、`src/cli.ts`）**：使用 `esbuild` 打包（`npm run build:cli` 挂载于 `npm run build`），支持单走廊费率测算（`--amount`、`--billing`、`--payout`、`--funding`、`--contractors`）、团队 CSV 批量损耗审计（`--csv`）、table/md/json 格式化输出及 `contractorfx.com` 交互引导，并在 `package.json` 注册 `bin` 字段。
 - **光栅化社交卡片与双 IndexNow 密钥（`public/`）**：由 `scripts/render-social-cards.mjs` 调用 Playwright 渲染生成 1200x630 `public/og-image.png` 与 1280x640 `public/github-social-preview.png`，保留 `og-image.svg`；创建 `public/b7e3d1c84a924f508c6e23b9a1d05e42.txt` 对齐根路径探测。
-- **生产级静态资产与构建后 SEO 门禁（`scripts/seo-preflight.mjs`）**：默认基准域名 `https://contractorfx.com`，全量校验 9 个内容路由与 11 个辅助产物（`404.html`、`sitemap-index.xml`、`robots.txt`、`llms.txt`、`_headers`、`og-image.svg`、`og-image.png`、`github-social-preview.png`、`site.webmanifest`、`indexnow-key.txt`、`b7e3d1c84a924f508c6e23b9a1d05e42.txt`）、PNG 8 字节魔数与 >5KB 大小校验、双 key 一致性、`_headers` 预览域名 `X-Robots-Tag: noindex` 拦截、唯一 `<title>` 与 `<meta name="description">`、精确 canonical、`og:image` 指向 PNG、JSON-LD 结构化数据、全站内部链接可达性，以及零占位符与零长短破折号。
-- **自动化测试闭环（Vitest + Playwright）**：27 项 Vitest 单元测试全绿（覆盖费率公式、CSV 解析与 CLI 命令分支）；6 条 Playwright E2E 路径全绿（覆盖计算器联动、Markdown 导出、零网络请求 CSV 审计、非法 CSV 恢复、GA4 `dataLayer` 去标识化事件与 `375x812` 移动端信任页导航）。
+- **生产级静态资产与构建后 SEO 门禁（`scripts/seo-preflight.mjs`）**：默认基准域名 `https://contractorfx.com`，全量校验 14 个内容路由与 11 个辅助产物（`404.html`、`sitemap-index.xml`、`robots.txt`、`llms.txt`、`_headers`、`og-image.svg`、`og-image.png`、`github-social-preview.png`、`site.webmanifest`、`indexnow-key.txt`、`b7e3d1c84a924f508c6e23b9a1d05e42.txt`）、PNG 8 字节魔数与 >5KB 大小校验、双 key 一致性、`_headers` 预览域名 `X-Robots-Tag: noindex` 拦截、唯一 `<title>` 与 `<meta name="description">`、精确 canonical、`og:image` 指向 PNG、JSON-LD 结构化数据、全站内部链接可达性，以及零占位符与零长短破折号。
+- **自动化测试闭环（Vitest + Playwright）**：33 项 Vitest 单元测试全绿（覆盖费率公式、CSV 解析、CLI 命令分支、长尾路由来源与 marketplace preset）；7 条 Playwright E2E 路径全绿（覆盖计算器联动、Markdown 导出、零网络请求 CSV 审计、非法 CSV 恢复、GA4 `dataLayer` 去标识化事件、`375x812` 移动端信任页导航，以及 5 个长尾页的费率来源、预设切换与本地导出）。
 - **冷启动分发与合规申请手册（`LAUNCH_KIT.md`、`LAUNCH_CHECKLIST.md`、`PLAN_90DAY.md`）**：提供 X 25 秒视频脚本与无外链发帖模板、3 组高意图痛点布尔检索词与高价值回复话术、HN Show HN 事实备忘、Reddit 深度干货拆解、目录站提交文案、Wise/Deel 申请陈词，并关联 `_ops/research/indie-site-workflow-20261112/tools/cf-zone-bootstrap.mjs` 自动化建站脚本。
 - **敏感文件拦截守卫（`.gitignore`）**：显式拦截 `.env`、`.env.*`（保留 `!.env.example`）、`.dev.vars`、`.dev.vars.*` 与 `*.pem`。
 
@@ -46,6 +51,7 @@
 
 ## 行动记录
 
+- `2026-11-13` `[AI]`：新增 5 个长尾计算器路由（`/fx-markup-calculator/`、`/payoneer-fees-calculator-india/`、`/wise-vs-payoneer-philippines/`、`/fiverr-payoneer-withdrawal-fee/`、`/upwork-withdrawal-fee-payoneer/`），并加入站点地图、页头页脚与 `llms.txt`。费率只采用 2026-11-13 读到的官方帮助页或定价页。Fiverr Payoneer Account 为 $3.00（两篇帮助文章一致）；本地币银行转账 $1 与 $3 冲突，预设留空。Upwork 到 Payoneer 的美元金额公开页未给出，预设留空；Direct to Local Bank 使用已公布的 $0.99。Payoneer India 提现带宽为 1% 至 4%，notice `a_id/45313` 在未登录状态下没有渲染出印度生效日期。计算器新增 marketplace withdrawal preset，以及 `received-balance` 资金方式（已到账时不再加一笔新的客户入金费）。未部署。
 - `2026-11-12` `[AI]`：核对 Email Routing（Zone `102de3b1af4b76feef4793ac430604f9`，`enabled: true`，`status: ready`，`hello@contractorfx.com` 与 `privacy@contractorfx.com` 转发至 `liqi199315@gmail.com`，MX、SPF、DKIM 锁定，`_dmarc` TXT）、Bing Webmaster Tools（`IsVerified: true`，`SubmitFeed` 已提交 `https://contractorfx.com/sitemap-index.xml`）与共享统计登记（`analytics-sites.yaml` 的 `contractorfx`）。`ga4-report.mjs`、`gsc-report.mjs`、`bing-report.mjs`、`analytics-registry.test.mjs` 退出码均为 `0`。剩余人工项为社区发布与联盟申请。
 - `2026-11-12` `[AI]`：部署生产 Worker，自定义域名生效；构建、发布预检及 SEO 检查通过，六种搜索机器人线上 HTTP `200`，www HTTP `301`。完成 GA4 和 GSC 配置、提交站点地图和 IndexNow；GSC 处理结果及流量尚待核对。
 

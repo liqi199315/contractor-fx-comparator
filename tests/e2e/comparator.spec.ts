@@ -216,4 +216,51 @@ Kavita Sharma,5100,USD,INR,payoneer`;
 		await expect(page).toHaveURL(/\/terms\/$/);
 		await expect(page.locator('h1')).toBeVisible();
 	});
+
+	test('long-tail pages publish sourced fees, marketplace presets, and a local export', async ({
+		page,
+	}) => {
+		await page.goto('/fx-markup-calculator/');
+		await expect(page.locator('h1')).toContainText('FX Markup Calculator');
+		await expect(page.locator('body')).toContainText('spread = (mid rate - actual rate) / mid rate');
+		await expect(page.locator('a[href="https://wise.com/us/pricing/send-money"]')).toBeVisible();
+		await expect(page.locator('nav[aria-label="Primary corridors and calculators"]')).toContainText('FX Markup');
+
+		const downloadPromise = page.waitForEvent('download');
+		await page.getByTestId('download-memo-md-btn').click();
+		const download = await downloadPromise;
+		expect(download.suggestedFilename()).toMatch(/\.md$/i);
+
+		await page.goto('/payoneer-fees-calculator-india/');
+		await expect(page.locator('h1')).toContainText('Indian Payees');
+		await expect(page.locator('body')).toContainText('1% to 4%');
+		await expect(page.locator('a[href="https://www.payoneer.com/en-in/about/pricing/"]')).toBeVisible();
+		await expect(page.locator('body')).toContainText('2026-11-13');
+
+		await page.goto('/wise-vs-payoneer-philippines/');
+		await expect(page.getByTestId('invoice-amount-input')).toHaveValue('1200');
+		await expect(page.getByTestId('payout-currency-select')).toHaveValue('PHP');
+		await expect(page.locator('a[href="https://www.payoneer.com/pricing/"]')).toBeVisible();
+
+		await page.goto('/fiverr-payoneer-withdrawal-fee/');
+		await expect(page.getByTestId('marketplace-fee-input')).toHaveValue('3');
+		await expect(page.getByTestId('marketplace-fee-note')).toHaveAttribute('data-marketplace-status', 'applied');
+		await page.getByTestId('marketplace-preset-select').selectOption('fiverr-local-currency-conflict');
+		await expect(page.getByTestId('marketplace-fee-input')).toHaveValue('');
+		await expect(page.getByTestId('marketplace-fee-note')).toHaveAttribute(
+			'data-marketplace-status',
+			'unpublished',
+		);
+
+		await page.goto('/upwork-withdrawal-fee-payoneer/');
+		await expect(page.getByTestId('marketplace-fee-input')).toHaveValue('');
+		await expect(page.locator('body')).toContainText('does not publish the dollar amount');
+		await page.getByTestId('marketplace-preset-select').selectOption('upwork-local-bank');
+		await expect(page.getByTestId('marketplace-fee-input')).toHaveValue('0.99');
+
+		await page.setViewportSize({ width: 375, height: 812 });
+		await page.goto('/fiverr-payoneer-withdrawal-fee/');
+		const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+		expect(scrollWidth).toBeLessThanOrEqual(375);
+	});
 });

@@ -15,13 +15,18 @@ Read these four files in order at the start of every session before you change c
 - **Editorial contact.** `hello@contractorfx.com`.
 - **Workspace stage.** Formal independent product repository in `30_products/contractor-fx-comparator/`.
 - **Tech stack.** Astro 5 (`output: 'static'`, `trailingSlash: 'always'`, `build.format: 'directory'`), Tailwind CSS v4, TypeScript (`astro/tsconfigs/strict`), Vitest, Playwright, Node CLI (`bin/contractor-fx.mjs`), and Cloudflare Workers Static Assets (`wrangler.jsonc`).
-- **Nine content routes (6 calculator routes + 3 E-E-A-T trust routes).**
+- **Fourteen content routes (11 calculator routes + 3 E-E-A-T trust routes).**
 	- `/` (`dist/index.html`)
 	- `/wise-vs-payoneer-fee-calculator/` (`dist/wise-vs-payoneer-fee-calculator/index.html`)
 	- `/deel-vs-remote-contractor-calculator/` (`dist/deel-vs-remote-contractor-calculator/index.html`)
 	- `/deel-vs-wise-contractor-payouts/` (`dist/deel-vs-wise-contractor-payouts/index.html`)
 	- `/deel-withdrawal-fee-calculator/` (`dist/deel-withdrawal-fee-calculator/index.html`)
 	- `/batch-contractor-payout-csv-audit/` (`dist/batch-contractor-payout-csv-audit/index.html`)
+	- `/fx-markup-calculator/` (`dist/fx-markup-calculator/index.html`)
+	- `/payoneer-fees-calculator-india/` (`dist/payoneer-fees-calculator-india/index.html`)
+	- `/wise-vs-payoneer-philippines/` (`dist/wise-vs-payoneer-philippines/index.html`)
+	- `/fiverr-payoneer-withdrawal-fee/` (`dist/fiverr-payoneer-withdrawal-fee/index.html`)
+	- `/upwork-withdrawal-fee-payoneer/` (`dist/upwork-withdrawal-fee-payoneer/index.html`)
 	- `/about/` (`dist/about/index.html`)
 	- `/privacy/` (`dist/privacy/index.html`)
 	- `/terms/` (`dist/terms/index.html`)
