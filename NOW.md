@@ -11,8 +11,8 @@
 - **GSC**：`sc-domain:contractorfx.com` DNS 验证成功，服务账号和 `liqi199315@gmail.com` 均为所有者；`https://contractorfx.com/sitemap-index.xml` 已提交，Google 返回待处理。
 - **Bing Webmaster Tools**：`IsVerified: true`（Cloudflare 未代理的 `verify.bing.com` CNAME）。站点地图 `https://contractorfx.com/sitemap-index.xml` 已通过 `SubmitFeed` 提交。
 - **共享统计登记**：`../../40_shared/analytics-sites.yaml` 键名 `contractorfx`，`ga4_property_id: "564010676"`，Measurement ID `G-BMWC0P9PW2`，`sc-domain:contractorfx.com`，站点 `https://contractorfx.com/`。
-- **线上路由（2026-11-15）**：线上 `sitemap-index.xml` 与本地一致，都是 14 个 URL。五个长尾页（`/fx-markup-calculator/`、`/payoneer-fees-calculator-india/`、`/wise-vs-payoneer-philippines/`、`/fiverr-payoneer-withdrawal-fee/`、`/upwork-withdrawal-fee-payoneer/`）均为线上 HTTP `200`。这不等于证明线上 commit 是仓内 HEAD。
-- **发布清单**：`npm run release:check` 退出码 `0`，状态 `pending_live_manifest`。线上没有 `release.json`，所以线上 commit 未证明；不是路由不一致。本地 HEAD 是 `00e73b4`（`00e73b49e05fbcc8f7850ce51a70e30937137965`）。上文 Worker 版本 `e4a15f92-55da-4268-9cd7-c01ab4abe08a` 是 2026-11-12 的部署记录，本次没有重新核对。
+- **线上路由（2026-11-15）**：线上 `sitemap-index.xml` 与本地一致，都是 14 个 URL。五个长尾页（`/fx-markup-calculator/`、`/payoneer-fees-calculator-india/`、`/wise-vs-payoneer-philippines/`、`/fiverr-payoneer-withdrawal-fee/`、`/upwork-withdrawal-fee-payoneer/`）均为线上 HTTP `200`。这不等于证明线上 commit 是仓内任何本地 commit。
+- **发布清单**：主会话最终 `npm run verify:all` 退出码 `0`（Vitest 33/33、Playwright 7/7、14 个内容路由、12 个附属产物）。`npm run release:check` 退出码 `0`，状态 `pending_live_manifest`。线上没有 `release.json`，因此任何本地 commit 都未证明已上线；这不是路由不一致。本地 C01 commit 是 `bb06221`（`bb062211ab5632a79bff2d68b0d313517d3d597a`，`chore: align release manifest and 404 branding`），不是 `00e73b4`。404 品牌修复已包含在 `bb06221`，不在工作区。记录该事实的文档提交不证明上线。上文 Worker 版本 `e4a15f92-55da-4268-9cd7-c01ab4abe08a` 是 2026-11-12 的部署记录，本次没有重新核对。
 - **IndexNow**：2026-11-12 已提交当时 9 个 URL，HTTP `202`。后来上线的 5 个长尾 URL 还没有再次提交。
 - **代码仓库**：公开仓库 `https://github.com/liqi199315/contractor-fx-comparator`（`gh repo view`：`visibility=PUBLIC`、`isPrivate=false`，2026-11-15 核实）。`package.json` 的 `"private": true` 只表示 npm 不发布，不是仓库可见性。
 
@@ -50,11 +50,12 @@
 
 ## 下一步第一动作
 
-- 站长按 `LAUNCH_KIT.md` 发布 Show HN、Reddit、X、Product Hunt，并提交 Wise Partnerize 与 Deel Affiliate 申请。GSC 站点地图处理结果仍为待处理，不阻塞这两项。线上 14 个内容 URL 已与本地站点地图一致，五个长尾页均为 HTTP `200`；还没有对这 5 个 URL 再次提交 IndexNow。线上没有 `release.json`，线上 commit 未证明；本次没有重新核对 Worker 版本。
+- 站长按 `LAUNCH_KIT.md` 发布 Show HN、Reddit、X、Product Hunt，并提交 Wise Partnerize 与 Deel Affiliate 申请。GSC 站点地图处理结果仍为待处理，不阻塞这两项。线上 14 个内容 URL 已与本地站点地图一致，五个长尾页均为 HTTP `200`；还没有对这 5 个 URL 再次提交 IndexNow。线上没有 `release.json`，任何本地 commit（含 C01 `bb06221` 及其上的文档提交）都未证明已上线；本次没有重新核对 Worker 版本。
 
 ## 行动记录
 
-- `2026-11-15` `[AI]`：C01 文档收口。线上 sitemap 与本地一致，都是 14 个 URL；五个长尾页均为线上 HTTP `200`。`npm run release:check` 退出码 `0`，状态 `pending_live_manifest`（线上没有 `release.json`，线上 commit 未证明）。本地 HEAD 是 `00e73b4`。`gh repo view` 核实仓库为公开（`visibility=PUBLIC`）。修正 AGENTS/NOW 里“五页未部署 / 线上旧版 / 私有仓库”的过时说法；2026-11-13 记录里的“未部署”保留为当时状态。同日早先已把 `src/pages/404.astro` 标题中的旧品牌 PayoutSpread 改为 ContractorFX，正文计算器数量从 6 改为 11，`canonicalPath="/404/"` 未改；该文件仍在工作区，未进本次文档提交范围。未改主站 SEO 标题，未改 `PLAN_90DAY.md`，未 commit、未 push、未部署。
+- `2026-11-15` `[AI]`：独立核验前的最终文档收口。本地 C01 commit 是 `bb06221`（`bb062211ab5632a79bff2d68b0d313517d3d597a`），不是 `00e73b4`。404 品牌修复已包含在 `bb06221`，不在工作区。主会话最终 `npm run verify:all` 退出码 `0`（Vitest 33/33、Playwright 7/7、14 个内容路由、12 个附属产物）。`npm run release:check` 退出码 `0`，状态 `pending_live_manifest`。线上没有 `release.json`，任何本地 commit 都未证明已上线。本轮只更新 `NOW.md`。未改代码与测试，未 push、未部署。
+- `2026-11-15` `[AI]`：C01 文档收口。线上 sitemap 与本地一致，都是 14 个 URL；五个长尾页均为线上 HTTP `200`。`npm run release:check` 退出码 `0`，状态 `pending_live_manifest`（线上没有 `release.json`，线上 commit 未证明）。`gh repo view` 核实仓库为公开（`visibility=PUBLIC`）。修正 AGENTS/NOW 里“五页未部署 / 线上旧版 / 私有仓库”的过时说法；2026-11-13 记录里的“未部署”保留为当时状态。404 品牌修复（`src/pages/404.astro` 标题旧品牌 PayoutSpread 改为 ContractorFX，正文计算器数量从 6 改为 11，`canonicalPath="/404/"` 未改）已包含在 `bb06221`，不在工作区。未改主站 SEO 标题，未改 `PLAN_90DAY.md`，未 push、未部署。
 - `2026-11-13` `[AI]`：新增 5 个长尾计算器路由（`/fx-markup-calculator/`、`/payoneer-fees-calculator-india/`、`/wise-vs-payoneer-philippines/`、`/fiverr-payoneer-withdrawal-fee/`、`/upwork-withdrawal-fee-payoneer/`），并加入站点地图、页头页脚与 `llms.txt`。费率只采用 2026-11-13 读到的官方帮助页或定价页。Fiverr Payoneer Account 为 $3.00（两篇帮助文章一致）；本地币银行转账 $1 与 $3 冲突，预设留空。Upwork 到 Payoneer 的美元金额公开页未给出，预设留空；Direct to Local Bank 使用已公布的 $0.99。Payoneer India 提现带宽为 1% 至 4%，notice `a_id/45313` 在未登录状态下没有渲染出印度生效日期。计算器新增 marketplace withdrawal preset，以及 `received-balance` 资金方式（已到账时不再加一笔新的客户入金费）。未部署。
 - `2026-11-12` `[AI]`：核对 Email Routing（Zone `102de3b1af4b76feef4793ac430604f9`，`enabled: true`，`status: ready`，`hello@contractorfx.com` 与 `privacy@contractorfx.com` 转发至 `liqi199315@gmail.com`，MX、SPF、DKIM 锁定，`_dmarc` TXT）、Bing Webmaster Tools（`IsVerified: true`，`SubmitFeed` 已提交 `https://contractorfx.com/sitemap-index.xml`）与共享统计登记（`analytics-sites.yaml` 的 `contractorfx`）。`ga4-report.mjs`、`gsc-report.mjs`、`bing-report.mjs`、`analytics-registry.test.mjs` 退出码均为 `0`。剩余人工项为社区发布与联盟申请。
 - `2026-11-12` `[AI]`：部署生产 Worker，自定义域名生效；构建、发布预检及 SEO 检查通过，六种搜索机器人线上 HTTP `200`，www HTTP `301`。完成 GA4 和 GSC 配置、提交站点地图和 IndexNow；GSC 处理结果及流量尚待核对。
