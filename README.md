@@ -122,10 +122,12 @@ npm run cf:preview
 
 - `npm run dev` starts the local Astro server at `http://127.0.0.1:4326`.
 - `npm test` runs the Vitest unit test suite covering `src/lib/fx-engine.ts` and `bin/contractor-fx.mjs`.
-- `npm run build` compiles all nine static routes, builds the standalone CLI, and outputs to `dist/`.
-- `npm run seo:check` runs `scripts/seo-preflight.mjs` against `dist/` (default origin `https://contractorfx.com`) to verify all routes, auxiliary static assets, unique `<title>` and `<meta name="description">`, exact canonical URLs, valid PNG `og:image` tags and binary magic bytes, single `<h1>`, `Organization` and `BreadcrumbList` JSON-LD plus `WebApplication` and `FAQPage` on every calculator route, internal link resolution, preview domain `noindex` headers, and zero placeholders or long dashes.
-- `npm run test:e2e` starts `npm run preview` on `http://127.0.0.1:4326/` and runs all six Chromium specs in `tests/e2e/comparator.spec.ts`, including GA4 `window.dataLayer` verification with zero external requests and `375x812` mobile viewport responsiveness across trust pages.
-- `npm run verify:all` runs unit tests, static build, SEO preflight, and Playwright E2E in sequence.
+- `npm run build` runs `astro build`, then `npm run release:manifest`, then builds the standalone CLI. It compiles all 14 content routes (11 calculator routes plus `/about/`, `/privacy/`, and `/terms/`) into `dist/`.
+- `npm run release:manifest` writes `dist/release.json` via `40_shared/scripts/indie-release-manifest.mjs --project contractorfx --dist dist --write`. The file records `schemaVersion`, `project` (`contractorfx`), `siteUrl`, `measurementId`, `builtAt`, `source` (`commit`, `branch`, `upstream`, `ahead`, `behind`, `dirtyPaths`), `routes`, `routeCount` (14), and `sitemapSha256` of `sitemap-0.xml`. `project`, `siteUrl`, `routeCount`, and `routes` must match that sitemap.
+- `npm run release:check` compares local `dist/release.json` with `https://contractorfx.com/release.json` (`--check-live --allow-pending-deploy`). Exit 0 with `pending_live_manifest` means the route set matches and the live file is absent, so the live commit is not proven. It is not a route mismatch.
+- `npm run seo:check` runs `scripts/seo-preflight.mjs` against `dist/` (default origin `https://contractorfx.com`) to verify all 14 routes, the 12 auxiliary static files (including `release.json` when present), unique `<title>` and `<meta name="description">`, exact canonical URLs, valid PNG `og:image` tags and binary magic bytes, single `<h1>`, `Organization` and `BreadcrumbList` JSON-LD plus `WebApplication` and `FAQPage` on every calculator route, internal link resolution, preview domain `noindex` headers, and zero placeholders or long dashes.
+- `npm run test:e2e` starts `npm run preview` on `http://127.0.0.1:4326/` and runs the Chromium specs in `tests/e2e/comparator.spec.ts`, including GA4 `window.dataLayer` verification with zero external requests and `375x812` mobile viewport responsiveness across trust pages.
+- `npm run verify:all` runs unit tests, static build (including `release:manifest`), SEO preflight, and Playwright E2E in sequence. It does not run `release:check`.
 
 ---
 

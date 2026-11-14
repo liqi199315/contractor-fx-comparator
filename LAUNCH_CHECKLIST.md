@@ -7,13 +7,18 @@ This runbook covers every manual (`[人工]`) and automated verification step re
 - Production: `https://contractorfx.com/`, Cloudflare Worker `contractor-fx-comparator`, version `e4a15f92-55da-4268-9cd7-c01ab4abe08a`; `www` redirects to the apex with HTTP `301`.
 - GA4: property `564010676`, web stream `16325680671`, measurement ID `G-BMWC0P9PW2`. Retention is 14 months; site search and form interaction enhanced measurement are disabled. `payout_calc_export` is a key event counted once per event.
 - Google Search Console: `sc-domain:contractorfx.com` verified by DNS; both `liqi199315@gmail.com` and `build-android@charged-sector-382503.iam.gserviceaccount.com` are verified owners. Sitemap `https://contractorfx.com/sitemap-index.xml` submitted with HTTP `204`, read back with HTTP `200`, pending processing.
-- IndexNow: submitted 9 URLs, HTTP `202`.
+- IndexNow: the 2026-11-12 submission covered the 9 URLs live then, HTTP `202`. The five long-tail URLs that are live now have not been submitted again.
 - Production HTML contains the measurement ID and returned HTTP `200` for Googlebot, AdsBot-Google, Bingbot, OAI-SearchBot, ChatGPT-User, and PerplexityBot. Build, launch preflight, and SEO check passed.
-- Email Routing: zone `102de3b1af4b76feef4793ac430604f9` is `active`. Routing is `enabled: true`, `status: ready`. `hello@contractorfx.com` and `privacy@contractorfx.com` forward to `liqi199315@gmail.com`. MX, SPF, and DKIM are locked, and `_dmarc` TXT is present.
-- Bing Webmaster Tools: `IsVerified: true` via a Cloudflare unproxied `verify.bing.com` CNAME. Sitemap `https://contractorfx.com/sitemap-index.xml` submitted with `SubmitFeed`.
-- Shared analytics: registered as `contractorfx` in `../../40_shared/analytics-sites.yaml` (`ga4_property_id: "564010676"`, `G-BMWC0P9PW2`, `sc-domain:contractorfx.com`, `https://contractorfx.com/`). `ga4-report.mjs`, `gsc-report.mjs`, `bing-report.mjs`, and `analytics-registry.test.mjs` each exited `0`.
-- Repository: private GitHub repo `https://github.com/liqi199315/contractor-fx-comparator`.
-- Still open `[人工]`: community launch posts from `LAUNCH_KIT.md` (Show HN, Reddit, X, Product Hunt) and affiliate applications (Wise Partnerize / Deel). Google sitemap processing is still pending. Live click totals are not copied into this file.
+
+## Live route status (2026-11-15)
+
+The 2026-11-12 section above is that day's deploy record. Current checks, not a new deploy:
+
+- Live `https://contractorfx.com/sitemap-index.xml` lists the same 14 URLs as the local sitemap. The five long-tail routes (`/fx-markup-calculator/`, `/payoneer-fees-calculator-india/`, `/wise-vs-payoneer-philippines/`, `/fiverr-payoneer-withdrawal-fee/`, `/upwork-withdrawal-fee-payoneer/`) each return HTTP `200`. Matching URLs do not prove the live commit.
+- `npm run release:check` exits 0 with status `pending_live_manifest`. Live `https://contractorfx.com/release.json` is absent, so the live commit is not proven. Local HEAD is `00e73b4` (`00e73b49e05fbcc8f7850ce51a70e30937137965`). The Worker version in the 2026-11-12 section was not re-checked this round.
+- Repository: public GitHub repo `https://github.com/liqi199315/contractor-fx-comparator` (`gh repo view` on 2026-11-15: `visibility=PUBLIC`, `isPrivate=false`). `package.json` `"private": true` only blocks npm publish.
+
+The rest of the 2026-11-12 record, unchanged this round: Email Routing zone `102de3b1af4b76feef4793ac430604f9` is `active` (`enabled: true`, `status: ready`; `hello@contractorfx.com` and `privacy@contractorfx.com` forward to `liqi199315@gmail.com`; MX, SPF, and DKIM locked; `_dmarc` TXT present). Bing Webmaster Tools `IsVerified: true` via an unproxied `verify.bing.com` CNAME, sitemap submitted with `SubmitFeed`. Shared analytics key `contractorfx` in `../../40_shared/analytics-sites.yaml`; `ga4-report.mjs`, `gsc-report.mjs`, `bing-report.mjs`, and `analytics-registry.test.mjs` each exited `0`. Still open `[人工]`: community launch posts from `LAUNCH_KIT.md` (Show HN, Reddit, X, Product Hunt) and affiliate applications (Wise Partnerize / Deel). Google sitemap processing is still pending. Live click totals are not copied into this file.
 
 ## 1. Run the local pre-launch verification gate
 
@@ -23,12 +28,14 @@ Before purchasing DNS records or deploying to Cloudflare, run the full local gat
 npm run verify:all
 ```
 
-Confirm all four stages pass with zero errors:
+Confirm every stage passes with zero errors. `verify:all` runs tests, build (which writes `release.json`), SEO check, and Playwright. Run `npm run release:check` after that; it is not inside `verify:all`.
 
 1. `npm test` passes all 27 Vitest calculation, CSV parser, and standalone CLI unit tests.
-2. `npm run build` compiles all 9 content routes (6 calculator routes plus `/about/`, `/privacy/`, `/terms/`), bundles `bin/contractor-fx.mjs`, and copies static assets into `dist/`.
-3. `npm run seo:check` validates `dist/` against `https://contractorfx.com`, confirming all 14 routes and 11 required static artifacts (`404.html`, `sitemap-index.xml`, `robots.txt`, `llms.txt`, `_headers`, `og-image.svg`, `og-image.png`, `github-social-preview.png`, `site.webmanifest`, `indexnow-key.txt`, `b7e3d1c84a924f508c6e23b9a1d05e42.txt`), valid PNG magic bytes and minimum 5 KB size, exact canonical URLs, `Organization`/`BreadcrumbList`/`WebApplication`/`FAQPage` JSON-LD, internal link resolution, preview domain `noindex` headers, and zero placeholders or dashes.
-4. `npm run test:e2e` passes all 7 Playwright Chromium specs, including local `window.dataLayer` funnel tracking (`config` and `payout_calc_export` with 0 external requests) and `375x812` mobile layout verification.
+2. `npm run build` compiles all 14 content routes (11 calculator routes plus `/about/`, `/privacy/`, `/terms/`), runs `npm run release:manifest`, bundles `bin/contractor-fx.mjs`, and copies static assets into `dist/`.
+3. `npm run release:manifest` writes `dist/release.json` (`40_shared/scripts/indie-release-manifest.mjs --project contractorfx --dist dist --write`). Fields: `schemaVersion`, `project` (`contractorfx`), `siteUrl`, `measurementId`, `builtAt`, `source.commit`, `source.branch`, `source.upstream`, `source.ahead`, `source.behind`, `source.dirtyPaths`, `routes`, `routeCount` (14), and `sitemapSha256` of `sitemap-0.xml`. `project`, `siteUrl`, `routeCount`, and `routes` must match that sitemap.
+4. `npm run release:check` compares local `dist/release.json` with `https://contractorfx.com/release.json` (`--check-live --allow-pending-deploy`). Exit 0 with `pending_live_manifest` means routes match and the live file is missing, so the live commit is not proven.
+5. `npm run seo:check` validates `dist/` against `https://contractorfx.com`, confirming all 14 routes and 12 required static artifacts (`404.html`, `sitemap-index.xml`, `robots.txt`, `llms.txt`, `_headers`, `og-image.svg`, `og-image.png`, `github-social-preview.png`, `site.webmanifest`, `indexnow-key.txt`, `b7e3d1c84a924f508c6e23b9a1d05e42.txt`, `release.json`), valid PNG magic bytes and minimum 5 KB size, exact canonical URLs, `Organization`/`BreadcrumbList`/`WebApplication`/`FAQPage` JSON-LD, internal link resolution, preview domain `noindex` headers, zero placeholders or dashes, and (when `release.json` is present) `project`, `siteUrl`, `routeCount`, and `routes` matching `sitemap-0.xml`.
+6. `npm run test:e2e` passes all 7 Playwright Chromium specs, including local `window.dataLayer` funnel tracking (`config` and `payout_calc_export` with 0 external requests) and `375x812` mobile layout verification.
 
 ## 2. Register `contractorfx.com` and configure zone via automated bootstrap (`[人工]`)
 
@@ -84,7 +91,7 @@ Status (2026-11-12): complete for registration and submission. Google Search Con
 2. **Bing Webmaster Tools and IndexNow:**
    - Import `https://contractorfx.com/` from Google Search Console inside Bing Webmaster Tools (covered by the shared key in `40_shared/bing-webmaster.key`).
    - Submit `https://contractorfx.com/sitemap-index.xml`.
-   - Confirm both `https://contractorfx.com/indexnow-key.txt` and `https://contractorfx.com/b7e3d1c84a924f508c6e23b9a1d05e42.txt` return HTTP `200`. Ping IndexNow with the 9 canonical URLs after first deploy.
+   - Confirm both `https://contractorfx.com/indexnow-key.txt` and `https://contractorfx.com/b7e3d1c84a924f508c6e23b9a1d05e42.txt` return HTTP `200`. The 2026-11-12 IndexNow ping covered the 9 canonical URLs live then. The five long-tail URLs are live (HTTP `200`) and have not been submitted to IndexNow again.
 
 ## 5. Wire GA4 funnel analytics and shared reporting (`[人工]` + `[AI]` tasks `P0-3` & `P0-4`)
 

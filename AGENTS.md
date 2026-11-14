@@ -15,7 +15,7 @@ Read these four files in order at the start of every session before you change c
 - **Editorial contact.** `hello@contractorfx.com`.
 - **Workspace stage.** Formal independent product repository in `30_products/contractor-fx-comparator/`.
 - **Tech stack.** Astro 5 (`output: 'static'`, `trailingSlash: 'always'`, `build.format: 'directory'`), Tailwind CSS v4, TypeScript (`astro/tsconfigs/strict`), Vitest, Playwright, Node CLI (`bin/contractor-fx.mjs`), and Cloudflare Workers Static Assets (`wrangler.jsonc`).
-- **Fourteen content routes (11 calculator routes + 3 E-E-A-T trust routes).**
+- **Fourteen content routes (11 calculator routes + 3 E-E-A-T trust routes).** Live `https://contractorfx.com/sitemap-index.xml` lists the same 14 URLs as the local sitemap, and the five long-tail routes return HTTP 200. The 2026-11-12 IndexNow submission covered only the 9 routes live at that time and has not been repeated for the five newer URLs. `release:check` exits 0 with `pending_live_manifest`: live `release.json` is absent, so the live commit is not proven. Do not treat that as a route mismatch or as proof that HEAD `00e73b4` is what production is running.
 	- `/` (`dist/index.html`)
 	- `/wise-vs-payoneer-fee-calculator/` (`dist/wise-vs-payoneer-fee-calculator/index.html`)
 	- `/deel-vs-remote-contractor-calculator/` (`dist/deel-vs-remote-contractor-calculator/index.html`)
@@ -30,7 +30,7 @@ Read these four files in order at the start of every session before you change c
 	- `/about/` (`dist/about/index.html`)
 	- `/privacy/` (`dist/privacy/index.html`)
 	- `/terms/` (`dist/terms/index.html`)
-- **Auxiliary static outputs (11 files in `dist/`).** `404.html`, `sitemap-index.xml`, `robots.txt`, `llms.txt`, `_headers`, `og-image.svg`, `og-image.png`, `github-social-preview.png`, `site.webmanifest`, `indexnow-key.txt`, and `b7e3d1c84a924f508c6e23b9a1d05e42.txt`.
+- **Auxiliary static outputs (12 files in `dist/`).** `404.html`, `sitemap-index.xml`, `robots.txt`, `llms.txt`, `_headers`, `og-image.svg`, `og-image.png`, `github-social-preview.png`, `site.webmanifest`, `indexnow-key.txt`, `b7e3d1c84a924f508c6e23b9a1d05e42.txt`, and `release.json`. `npm run build` runs `release:manifest` after `astro build` and writes `dist/release.json` (`schemaVersion`, `project`, `siteUrl`, `measurementId`, `builtAt`, `source.commit` / `branch` / `upstream` / `ahead` / `behind` / `dirtyPaths`, `routes`, `routeCount`, `sitemapSha256`). `project`, `siteUrl`, `routeCount`, and `routes` must match `sitemap-0.xml`. `npm run release:check` compares that file with `https://contractorfx.com/release.json` (`--check-live --allow-pending-deploy`).
 - **Standalone CLI.** `bin/contractor-fx.mjs` bundled via `npm run build:cli` using `esbuild`. Supports single corridor comparison, CSV batch audits, table/markdown/json outputs, and points to `https://contractorfx.com`.
 - **Launch distribution assets.** `LAUNCH_KIT.md` compiles X native demo scripts, high-intent boolean search queries, Hacker News factual submission data notes, Reddit educational breakdowns, and directory copy.
 
@@ -52,6 +52,7 @@ Run all checks from `/Users/dake/Projects/aiapp/30_products/contractor-fx-compar
 npm test
 npm run build
 npm run seo:check
+npm run release:check
 npm run test:e2e
 npm run verify:all
 ```
