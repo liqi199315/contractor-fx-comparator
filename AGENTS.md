@@ -15,7 +15,7 @@ Read these four files in order at the start of every session before you change c
 - **Editorial contact.** `hello@contractorfx.com`.
 - **Workspace stage.** Formal independent product repository in `30_products/contractor-fx-comparator/`.
 - **Tech stack.** Astro 5 (`output: 'static'`, `trailingSlash: 'always'`, `build.format: 'directory'`), Tailwind CSS v4, TypeScript (`astro/tsconfigs/strict`), Vitest, Playwright, Node CLI (`bin/contractor-fx.mjs`), and Cloudflare Workers Static Assets (`wrangler.jsonc`).
-- **Fourteen content routes (11 calculator routes + 3 E-E-A-T trust routes).** Live `https://contractorfx.com/sitemap-index.xml` lists the same 14 URLs as the local sitemap, and the five long-tail routes return HTTP 200. The 2026-11-12 IndexNow submission covered only the 9 routes live at that time and has not been repeated for the five newer URLs. `release:check` exits 0 with `pending_live_manifest`: live `release.json` is absent, so the live commit is not proven. Do not treat that as a route mismatch or as proof that HEAD `00e73b4` is what production is running.
+- **Fourteen content routes (11 calculator routes + 3 E-E-A-T trust routes).** Live `https://contractorfx.com/sitemap-index.xml` lists the same 14 URLs as the local sitemap, and all 14 return HTTP 200. `npm run release:check` exits 0 with `match`: live `release.json` records commit `10ca4e6dd2c9`, the same commit that was deployed. IndexNow was re-submitted on 2026-11-15 with all 14 URLs (HTTP 200).
 	- `/` (`dist/index.html`)
 	- `/wise-vs-payoneer-fee-calculator/` (`dist/wise-vs-payoneer-fee-calculator/index.html`)
 	- `/deel-vs-remote-contractor-calculator/` (`dist/deel-vs-remote-contractor-calculator/index.html`)
