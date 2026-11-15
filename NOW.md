@@ -3,7 +3,7 @@
 ## 当前阶段（2026-11-15）
 
 - **项目路径**：`/Users/dake/Projects/aiapp/30_products/contractor-fx-comparator/`（已迁入 `30_products/` 正式产品仓）
-- **线上站点**：`https://contractorfx.com`。2026-11-12 部署记录里的 Worker 版本是 `e4a15f92-55da-4268-9cd7-c01ab4abe08a`。2026-11-15 上线部署版本为 `95881092-ae85-417b-8feb-4ec893322f72`，线上 `/release.json` 记录 commit `10ca4e6dd2c9`，与部署时 HEAD 一致（`npm run release:check` 输出 `match`）；14 条路由全部 HTTP 200，页面含 `G-BMWC0P9PW2`。Zone `102de3b1af4b76feef4793ac430604f9`（`contractorfx.com`）状态 `active`。Email Routing 为 `enabled: true`、`status: ready`：`hello@contractorfx.com` 与 `privacy@contractorfx.com` 转发到 `liqi199315@gmail.com`，MX、SPF、DKIM 已锁定，并有 `_dmarc` TXT。
+- **线上站点**：`https://contractorfx.com`。2026-11-12 部署记录里的 Worker 版本是 `e4a15f92-55da-4268-9cd7-c01ab4abe08a`。2026-11-15 上线时线上 `/release.json` 的 commit 与部署时 `git rev-parse HEAD` 一致，`npm run release:check` 输出 `match`；14 条路由全部 HTTP 200，页面含 `G-BMWC0P9PW2`。Worker Version ID 以 `npx wrangler deployments list` 为准。Zone `102de3b1af4b76feef4793ac430604f9`（`contractorfx.com`）状态 `active`。Email Routing 为 `enabled: true`、`status: ready`：`hello@contractorfx.com` 与 `privacy@contractorfx.com` 转发到 `liqi199315@gmail.com`，MX、SPF、DKIM 已锁定，并有 `_dmarc` TXT。
 - **代码提交（2026-11-15 上线）**：`main` 已 rebase 到远端 `aa20438`（GA4 `payout_calc_result` 事件）之上，本地提交为 `30cf4e6` 发布清单与 404 品牌、`10ca4e6` 最终文档，均已 push 到 `origin/main`。rebase 后 `npm run verify:all` 退出码 `0`（Vitest 39/39、Playwright 7/7）。
 - **GA4 注入事故与修复（2026-11-15）**：本轮第一次部署漏了 `PUBLIC_GA4_MEASUREMENT_ID`，线上页面落成 `G-PENDING000` 占位符，而 `release:check` 仍报匹配（清单读的是注册表，不是构建产物）。已用 `PUBLIC_SITE_URL=https://contractorfx.com PUBLIC_GA4_MEASUREMENT_ID=G-BMWC0P9PW2` 重建并重新部署；共享清单脚本新增“每个构建 HTML 必须含注册表 measurement ID”的强制校验，测试 10/10。今后构建必须显式带环境变量。
 - **90 天试验窗口**：`2026-11-12` 至 `2027-02-10`（详见 `PLAN_90DAY.md`）
