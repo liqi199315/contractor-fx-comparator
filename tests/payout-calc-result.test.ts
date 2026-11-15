@@ -55,10 +55,27 @@ describe('payout_calc_result', () => {
 		expect(isSuccessfulComparisonResult(input(), summary(0))).toBe(false);
 	});
 
-	it('sends payout_calc_result once through trackToolEvent, then ignores later successes', () => {
-		const first = trackPayoutCalcResultOnce(false, input(), summary(5));
-		const second = trackPayoutCalcResultOnce(first, input({ payoutCurrency: 'INR' }), summary(5));
-		const third = trackPayoutCalcResultOnce(second, input({ payoutCurrency: 'EUR' }), summary(4));
+	it('does not send the prefilled page-load comparison before the user interacts', () => {
+		const pageLoad = trackPayoutCalcResultOnce(false, false, input(), summary(5));
+		expect(pageLoad).toBe(false);
+		expect(trackToolEventMock).not.toHaveBeenCalled();
+	});
+
+	it('sends payout_calc_result once after a user interaction, then ignores later successes', () => {
+		const pageLoad = trackPayoutCalcResultOnce(false, false, input(), summary(5));
+		const first = trackPayoutCalcResultOnce(pageLoad, true, input(), summary(5));
+		const second = trackPayoutCalcResultOnce(
+			first,
+			true,
+			input({ payoutCurrency: 'INR' }),
+			summary(5),
+		);
+		const third = trackPayoutCalcResultOnce(
+			second,
+			true,
+			input({ payoutCurrency: 'EUR' }),
+			summary(4),
+		);
 
 		expect(first).toBe(true);
 		expect(second).toBe(true);
@@ -70,12 +87,22 @@ describe('payout_calc_result', () => {
 		});
 	});
 
-	it('does not send the event for an invalid comparison, and still sends the later valid one once', () => {
-		const blocked = trackPayoutCalcResultOnce(false, input({ invoiceAmount: 0 }), summary());
+	it('does not send an invalid user comparison, and still sends the later valid one once', () => {
+		const blocked = trackPayoutCalcResultOnce(
+			false,
+			true,
+			input({ invoiceAmount: 0 }),
+			summary(),
+		);
 		expect(blocked).toBe(false);
 		expect(trackToolEventMock).not.toHaveBeenCalled();
 
-		const sent = trackPayoutCalcResultOnce(blocked, input({ payoutCurrency: 'MXN' }), summary(5));
+		const sent = trackPayoutCalcResultOnce(
+			blocked,
+			true,
+			input({ payoutCurrency: 'MXN' }),
+			summary(5),
+		);
 		expect(sent).toBe(true);
 		expect(trackToolEventMock).toHaveBeenCalledTimes(1);
 		expect(trackToolEventMock).toHaveBeenCalledWith(PAYOUT_CALC_RESULT_EVENT, {
@@ -85,7 +112,7 @@ describe('payout_calc_result', () => {
 	});
 
 	it('does not put the invoice amount or any other user text in the event params', () => {
-		trackPayoutCalcResultOnce(false, input({ invoiceAmount: 12345.67 }), summary(5));
+		trackPayoutCalcResultOnce(false, true, input({ invoiceAmount: 12345.67 }), summary(5));
 		const params = trackToolEventMock.mock.calls[0]?.[1] ?? {};
 		expect(params).toEqual({ route_count: 5, payout: 'PHP' });
 		expect(JSON.stringify(params)).not.toContain('12345.67');

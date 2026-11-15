@@ -876,9 +876,6 @@ const providerLabels: Record<string, string> = {
 			const isCalc = mode === 'calculator';
 			panelCalc.hidden = !isCalc;
 			panelCsv.hidden = isCalc;
-			if (isCalc) {
-				renderCalculator();
-			}
 			tabCalc.setAttribute('aria-selected', isCalc ? 'true' : 'false');
 			tabCsv.setAttribute('aria-selected', !isCalc ? 'true' : 'false');
 			tabCalc.className = isCalc ? TAB_ACTIVE_CLASS : TAB_IDLE_CLASS;
@@ -960,14 +957,22 @@ const providerLabels: Record<string, string> = {
 		);
 
 		let payoutCalcResultSent = false;
+		let calculatorInteractionPending = false;
 		function renderCalculator(): void {
 			const { input, customMidRate } = readCurrentInput();
 			const summary = comparePayoutProviders(input, customMidRate);
 			latestInput = input;
 			latestSummary = summary;
-			if (root.dataset.initialMode === 'calculator') {
+			const userRequestedResult = calculatorInteractionPending;
+			calculatorInteractionPending = false;
+			if (
+				userRequestedResult &&
+				root.dataset.initialMode === 'calculator' &&
+				!payoutCalcResultSent
+			) {
 				payoutCalcResultSent = trackPayoutCalcResultOnce(
 					payoutCalcResultSent,
+					true,
 					input,
 					summary,
 				);
@@ -1103,6 +1108,7 @@ const providerLabels: Record<string, string> = {
 				if (feeBearerSelect && pill.dataset.feeBearer) feeBearerSelect.value = pill.dataset.feeBearer;
 				if (customMidRateInput) customMidRateInput.value = '';
 
+				calculatorInteractionPending = true;
 				renderCalculator();
 				trackToolEvent('corridor_changed', {
 					billing: latestInput.billingCurrency,
@@ -1128,6 +1134,7 @@ const providerLabels: Record<string, string> = {
 
 		marketplacePresetSelect?.addEventListener('change', () => {
 			applyMarketplacePreset();
+			calculatorInteractionPending = true;
 			renderCalculator();
 		});
 
@@ -1150,6 +1157,7 @@ const providerLabels: Record<string, string> = {
 				marketplaceNote.className =
 					'rounded-lg border px-3 py-2 text-xs leading-relaxed border-amber-300 bg-amber-50 text-amber-950';
 			}
+			calculatorInteractionPending = true;
 			renderCalculator();
 		});
 
@@ -1164,9 +1172,14 @@ const providerLabels: Record<string, string> = {
 			customMidRateInput,
 		];
 
+		const renderCalculatorFromUserInput = (): void => {
+			calculatorInteractionPending = true;
+			renderCalculator();
+		};
+
 		for (const control of calcControls) {
-			control?.addEventListener('input', renderCalculator);
-			control?.addEventListener('change', renderCalculator);
+			control?.addEventListener('input', renderCalculatorFromUserInput);
+			control?.addEventListener('change', renderCalculatorFromUserInput);
 		}
 
 		const handleCorridorSelectChange = (): void => {

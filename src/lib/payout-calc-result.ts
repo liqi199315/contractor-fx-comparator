@@ -35,16 +35,19 @@ export function payoutCalcResultParams(
 }
 
 /**
- * Sends `payout_calc_result` at most once for this page load. Later successful
- * comparisons, and any comparison that is not a result, do not send it again.
- * Returns whether this call sent the event.
+ * Sends `payout_calc_result` at most once for this page load, and only after the
+ * visitor changed a calculator control. The prefilled comparison that runs on
+ * page load does not count. Later successful comparisons, and any comparison
+ * that is not a result, do not send it again. Returns whether the event has
+ * been sent for this page load.
  */
 export function trackPayoutCalcResultOnce(
 	alreadySent: boolean,
+	userInteracted: boolean,
 	input: Pick<PayoutScenarioInput, 'invoiceAmount' | 'payoutCurrency'>,
 	summary: Pick<ComparisonSummary, 'quotes'>,
 ): boolean {
-	if (alreadySent || !isSuccessfulComparisonResult(input, summary)) {
+	if (alreadySent || !userInteracted || !isSuccessfulComparisonResult(input, summary)) {
 		return alreadySent;
 	}
 	trackToolEvent(PAYOUT_CALC_RESULT_EVENT, payoutCalcResultParams(input, summary));
