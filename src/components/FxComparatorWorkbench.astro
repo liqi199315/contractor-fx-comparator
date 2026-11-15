@@ -774,6 +774,7 @@ const providerLabels: Record<string, string> = {
 		comparePayoutProviders,
 		exportComparisonReport,
 	} from '../lib/fx-engine';
+	import { trackPayoutCalcResultOnce } from '../lib/payout-calc-result';
 	import { SAMPLE_TEAM_CSV } from '../lib/sample-csv';
 	import type {
 		BillingCurrency,
@@ -875,6 +876,9 @@ const providerLabels: Record<string, string> = {
 			const isCalc = mode === 'calculator';
 			panelCalc.hidden = !isCalc;
 			panelCsv.hidden = isCalc;
+			if (isCalc) {
+				renderCalculator();
+			}
 			tabCalc.setAttribute('aria-selected', isCalc ? 'true' : 'false');
 			tabCsv.setAttribute('aria-selected', !isCalc ? 'true' : 'false');
 			tabCalc.className = isCalc ? TAB_ACTIVE_CLASS : TAB_IDLE_CLASS;
@@ -955,11 +959,19 @@ const providerLabels: Record<string, string> = {
 			readCurrentInput().customMidRate,
 		);
 
+		let payoutCalcResultSent = false;
 		function renderCalculator(): void {
 			const { input, customMidRate } = readCurrentInput();
 			const summary = comparePayoutProviders(input, customMidRate);
 			latestInput = input;
 			latestSummary = summary;
+			if (root.dataset.initialMode === 'calculator') {
+				payoutCalcResultSent = trackPayoutCalcResultOnce(
+					payoutCalcResultSent,
+					input,
+					summary,
+				);
+			}
 
 			syncActivePresetPill(input, customMidRate);
 
