@@ -73,6 +73,42 @@ function buildContentRoutes(origin = SITE_ORIGIN) {
 			kind: 'tool',
 		},
 		{
+			route: '/us-contractor-w8ben-tax-withholding-calculator/',
+			file: 'us-contractor-w8ben-tax-withholding-calculator/index.html',
+			canonical: `${origin}/us-contractor-w8ben-tax-withholding-calculator/`,
+			kind: 'tool',
+		},
+		{
+			route: '/usd-to-brl-pix-contractor-payout-guide/',
+			file: 'usd-to-brl-pix-contractor-payout-guide/index.html',
+			canonical: `${origin}/usd-to-brl-pix-contractor-payout-guide/`,
+			kind: 'tool',
+		},
+		{
+			route: '/usd-to-mxn-spei-freelancer-payouts/',
+			file: 'usd-to-mxn-spei-freelancer-payouts/index.html',
+			canonical: `${origin}/usd-to-mxn-spei-freelancer-payouts/`,
+			kind: 'tool',
+		},
+		{
+			route: '/paypal-contractor-fx-fee-calculator/',
+			file: 'paypal-contractor-fx-fee-calculator/index.html',
+			canonical: `${origin}/paypal-contractor-fx-fee-calculator/`,
+			kind: 'tool',
+		},
+		{
+			route: '/usd-to-cad-contractor-payout-calculator/',
+			file: 'usd-to-cad-contractor-payout-calculator/index.html',
+			canonical: `${origin}/usd-to-cad-contractor-payout-calculator/`,
+			kind: 'tool',
+		},
+		{
+			route: '/contractor-payout-fail-rate-reconciliation-guide/',
+			file: 'contractor-payout-fail-rate-reconciliation-guide/index.html',
+			canonical: `${origin}/contractor-payout-fail-rate-reconciliation-guide/`,
+			kind: 'tool',
+		},
+		{
 			route: '/about/',
 			file: 'about/index.html',
 			canonical: `${origin}/about/`,

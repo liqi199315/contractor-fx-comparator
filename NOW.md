@@ -22,7 +22,7 @@
 
 - **计算与比较类型契约（`src/lib/types.ts`）**：定义 `BillingCurrency`、`PayoutCurrency`、`FundingMethod`、`FeeBearer`、`ProviderId`（wise / payoneer / deel / remote / swift-wire）、`PayoutScenarioInput`、`ProviderQuote`、`ComparisonSummary`、`BatchCsvRowResult`、`BatchAuditResult`、`FxRoutePreset` 等强类型结构。
 - **透明费率计算与 CSV 审计引擎（`src/lib/fx-engine.ts`、`src/lib/sample-csv.ts`）**：建模 Wise Business、Payoneer、Deel、Remote、传统 SWIFT 电汇的月度席位费、入金通道费、固定提现费与汇率点差损耗，支持单笔及 12 个月多承包商折算、零上传团队 CSV 批量审计与 CFO 级 Markdown/CSV 备忘录导出。
-- **14 个静态内容路由（11 个工具页 + 3 个联盟合规信任页）**：
+- **20 个静态内容路由（17 个工具页 + 3 个联盟合规信任页）**：
   1. `/`（Wise vs Payoneer 综合国际结算计算器，默认 3,500 USD -> INR）
   2. `/wise-vs-payoneer-fee-calculator/`（Wise vs Payoneer 细分手续费对比，默认 2,000 USD -> PHP）
   3. `/deel-vs-remote-contractor-calculator/`（Deel vs Remote 承包商成本对比，默认 4,500 USD -> BRL，5 人团队）
@@ -34,9 +34,15 @@
   9. `/wise-vs-payoneer-philippines/`（菲律宾 VA 收款人页，默认 1,200 USD -> PHP）
   10. `/fiverr-payoneer-withdrawal-fee/`（Fiverr 提到 Payoneer Account 的公开手续费 $3.00。本地币银行转账两篇帮助文章不一致，因此不自动填数）
   11. `/upwork-withdrawal-fee-payoneer/`（Upwork 到 Payoneer 的美元手续费公开帮助页未给出。Direct to Local Bank 使用已公布的 $0.99）
-  12. `/about/`（编辑政策与费率建模方法论：公开费率来源、中间价点差公式、季度复核机制、非官方关联声明与 `hello@contractorfx.com` 联系方式）
-  13. `/privacy/`（零上传隐私保证：明确账单与团队 CSV 永不离开浏览器、匿名化 GA4 事件策略、GDPR 与 CCPA/CPRA 披露）
-  14. `/terms/`（使用条款与免责声明：非财务/税务/法律建议声明、实时通道与 KYC 分层费率差异说明、FTC `16 CFR Part 255` 联盟披露规范）
+  12. `/us-contractor-w8ben-tax-withholding-calculator/`（美国海外承包商 W-8BEN 预提税自查与非居民合规计算器，默认 4,000 USD -> INR）
+  13. `/usd-to-brl-pix-contractor-payout-guide/`（巴西远程开发者 PIX 即时结算、IOF 税与外汇点差测算，默认 4,500 USD -> BRL）
+  14. `/usd-to-mxn-spei-freelancer-payouts/`（墨西哥近岸外包 SPEI 即时清算、RESICO 税制合规与 Deel 提现费对比，默认 3,000 USD -> MXN）
+  15. `/paypal-contractor-fx-fee-calculator/`（PayPal 隐性汇率加点与商业收款费率拆解，默认 2,500 USD -> EUR）
+  16. `/usd-to-cad-contractor-payout-calculator/`（美加跨境本地 EFT 直存对比银行电汇接收费与汇率加点，默认 5,000 USD -> CAD）
+  17. `/contractor-payout-fail-rate-reconciliation-guide/`（SWIFT 国际电汇中转行扣费 OUR/BEN/SHA 与退汇对账排错指南，默认 3,500 USD -> EUR）
+  18. `/about/`（编辑政策与费率建模方法论：公开费率来源、中间价点差公式、季度复核机制、非官方关联声明与 hello@contractorfx.com 联系方式）
+  19. `/privacy/`（零上传隐私保证：明确账单与团队 CSV 永不离开浏览器、匿名化 GA4 事件策略、GDPR 与 CCPA/CPRA 披露）
+  20. `/terms/`（使用条款与免责声明：非财务/税务/法律建议声明、实时通道与 KYC 分层费率差异说明、FTC 16 CFR Part 255 联盟披露规范）
 - **独立 Node ESM CLI（`bin/contractor-fx.mjs`、`src/cli.ts`）**：使用 `esbuild` 打包（`npm run build:cli` 挂载于 `npm run build`），支持单走廊费率测算（`--amount`、`--billing`、`--payout`、`--funding`、`--contractors`）、团队 CSV 批量损耗审计（`--csv`）、table/md/json 格式化输出及 `contractorfx.com` 交互引导，并在 `package.json` 注册 `bin` 字段。
 - **光栅化社交卡片与双 IndexNow 密钥（`public/`）**：由 `scripts/render-social-cards.mjs` 调用 Playwright 渲染生成 1200x630 `public/og-image.png` 与 1280x640 `public/github-social-preview.png`，保留 `og-image.svg`；创建 `public/b7e3d1c84a924f508c6e23b9a1d05e42.txt` 对齐根路径探测。
 - **生产级静态资产与构建后 SEO 门禁（`scripts/seo-preflight.mjs`）**：默认基准域名 `https://contractorfx.com`，全量校验 14 个内容路由与 12 个辅助产物（`404.html`、`sitemap-index.xml`、`robots.txt`、`llms.txt`、`_headers`、`og-image.svg`、`og-image.png`、`github-social-preview.png`、`site.webmanifest`、`indexnow-key.txt`、`b7e3d1c84a924f508c6e23b9a1d05e42.txt`、`release.json`）、PNG 8 字节魔数与 >5KB 大小校验、双 key 一致性、`_headers` 预览域名 `X-Robots-Tag: noindex` 拦截、唯一 `<title>` 与 `<meta name="description">`、精确 canonical、`og:image` 指向 PNG、JSON-LD 结构化数据、全站内部链接可达性，以及零占位符与零长短破折号。`release.json` 存在时，`project`、`siteUrl`、`routeCount`、`routes` 必须与 `sitemap-0.xml` 一致。
@@ -56,6 +62,7 @@
 
 ## 行动记录
 
+- `2026-11-17` `[AI]`：完成五站联动改造实施（遵循 28 天标题冻结期与零上传红线，不加 ads.txt，不接 AdSense，严守 totalFeeDragUsd 排序中立）。为前 6 个核心路由（`/` 至 `/batch-contractor-payout-csv-audit/`）补齐官方 feeSources、workedExample、auditCallout 与清算轨道信息；重构 `[preset].astro` 消除模板克隆感；升级 `/about/` 与 `BaseLayout.astro` 补充跨国财资/薪酬编辑团队标准与语义化 `<time datetime="2026-11-17">` 更新时间；上线 6 个高价值无内耗子页面（W-8BEN 预提税、巴西 PIX、墨西哥 SPEI、PayPal 隐性汇率加点、加拿大 EFT、SWIFT 电汇对账排错），全站内容路由扩展至 20 条；更新 `scripts/seo-preflight.mjs`、`public/llms.txt`、`AGENTS.md`、`NOW.md`；跑通 `npm run verify:all`（Vitest 39/39、Playwright 7/7、SEO 预检 20 路由全绿，移动端 375px 无横向滚动）。未 push、未部署。
 - `2026-11-15` `[AI]`：独立核验前的最终文档收口。本地 C01 commit 是 `bb06221`（`bb062211ab5632a79bff2d68b0d313517d3d597a`），不是 `00e73b4`。404 品牌修复已包含在 `bb06221`，不在工作区。主会话最终 `npm run verify:all` 退出码 `0`（Vitest 33/33、Playwright 7/7、14 个内容路由、12 个附属产物）。`npm run release:check` 退出码 `0`，状态 `pending_live_manifest`。线上没有 `release.json`，任何本地 commit 都未证明已上线。本轮只更新 `NOW.md`。未改代码与测试，未 push、未部署。
 - `2026-11-15` `[AI]`：C01 文档收口。线上 sitemap 与本地一致，都是 14 个 URL；五个长尾页均为线上 HTTP `200`。`npm run release:check` 退出码 `0`，状态 `pending_live_manifest`（线上没有 `release.json`，线上 commit 未证明）。`gh repo view` 核实仓库为公开（`visibility=PUBLIC`）。修正 AGENTS/NOW 里“五页未部署 / 线上旧版 / 私有仓库”的过时说法；2026-11-13 记录里的“未部署”保留为当时状态。404 品牌修复（`src/pages/404.astro` 标题旧品牌 PayoutSpread 改为 ContractorFX，正文计算器数量从 6 改为 11，`canonicalPath="/404/"` 未改）已包含在 `bb06221`，不在工作区。未改主站 SEO 标题，未改 `PLAN_90DAY.md`，未 push、未部署。
 - `2026-11-13` `[AI]`：新增 5 个长尾计算器路由（`/fx-markup-calculator/`、`/payoneer-fees-calculator-india/`、`/wise-vs-payoneer-philippines/`、`/fiverr-payoneer-withdrawal-fee/`、`/upwork-withdrawal-fee-payoneer/`），并加入站点地图、页头页脚与 `llms.txt`。费率只采用 2026-11-13 读到的官方帮助页或定价页。Fiverr Payoneer Account 为 $3.00（两篇帮助文章一致）；本地币银行转账 $1 与 $3 冲突，预设留空。Upwork 到 Payoneer 的美元金额公开页未给出，预设留空；Direct to Local Bank 使用已公布的 $0.99。Payoneer India 提现带宽为 1% 至 4%，notice `a_id/45313` 在未登录状态下没有渲染出印度生效日期。计算器新增 marketplace withdrawal preset，以及 `received-balance` 资金方式（已到账时不再加一笔新的客户入金费）。未部署。

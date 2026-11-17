@@ -28,7 +28,7 @@ const resolvedFaqs = Array.isArray(faqs)
 	: [];
 
 const ga4MeasurementId =
-	(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID || '').trim() || 'G-PENDING000';
+	(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID || '').trim() || 'G-BMWC0P9PW2';
 const clarityProjectId = (import.meta.env.PUBLIC_CLARITY_PROJECT_ID || '').trim();
 
 const ga4InlineBootstrap = `(function(){
@@ -208,6 +208,13 @@ const schemaGraph: Record<string, unknown>[] = [
 		publisher: {
 			'@id': organizationId,
 		},
+		author: {
+			'@type': 'Organization',
+			name: 'ContractorFX Editorial & Treasury Team',
+			url: `${siteOrigin}/about/`,
+		},
+		datePublished: '2026-11-12',
+		dateModified: '2026-11-17',
 		offers: {
 			'@type': 'Offer',
 			price: '0',
@@ -244,6 +251,8 @@ const jsonLdString = JSON.stringify({
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>{title}</title>
 		<meta name="description" content={description} />
+		<meta name="author" content="ContractorFX Editorial &amp; Treasury Team" />
+		<meta property="article:modified_time" content="2026-11-17T00:00:00Z" />
 		<meta name="theme-color" content="#0f172a" />
 		{
 			noindex ? (

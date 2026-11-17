@@ -258,7 +258,15 @@ Kavita Sharma,5100,USD,INR,payoneer`;
 		await page.getByTestId('marketplace-preset-select').selectOption('upwork-local-bank');
 		await expect(page.getByTestId('marketplace-fee-input')).toHaveValue('0.99');
 
+		await page.goto('/us-contractor-w8ben-tax-withholding-calculator/');
+		await expect(page.locator('h1')).toContainText('W-8BEN');
+		await expect(page.locator('body')).toContainText('Internal Revenue Service');
+
 		await page.setViewportSize({ width: 375, height: 812 });
+		await page.goto('/us-contractor-w8ben-tax-withholding-calculator/');
+		const w8benScrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+		expect(w8benScrollWidth).toBeLessThanOrEqual(375);
+
 		await page.goto('/fiverr-payoneer-withdrawal-fee/');
 		const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
 		expect(scrollWidth).toBeLessThanOrEqual(375);

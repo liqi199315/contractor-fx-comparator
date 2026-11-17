@@ -19,6 +19,12 @@ Rate methodology and independence disclaimer: Independent fee modeling tool; not
 - [Wise vs Payoneer Philippines](https://contractorfx.com/wise-vs-payoneer-philippines/): Philippines virtual assistant payee page for a $1,200 USD to PHP retainer. Payoneer conversion band is 1.2% to 4%.
 - [Fiverr Payoneer Withdrawal Fee](https://contractorfx.com/fiverr-payoneer-withdrawal-fee/): Stacks the published $3.00 Fiverr Payoneer Account withdrawal fee. Local-currency bank fee is left blank where Fiverr help articles disagree.
 - [Upwork Withdrawal Fee to Payoneer](https://contractorfx.com/upwork-withdrawal-fee-payoneer/): Upwork Payoneer dollar fee is not published on the help page checked 2026-11-13. Direct to Local Bank is the published $0.99 preset.
+- [W-8BEN Contractor Tax Withholding Calculator](https://contractorfx.com/us-contractor-w8ben-tax-withholding-calculator/): Evaluates 0% foreign-source vs 30% default backup withholding under IRS rules with live contractor payout fee benchmarks.
+- [USD to BRL PIX Contractor Payout Guide](https://contractorfx.com/usd-to-brl-pix-contractor-payout-guide/): Benchmarks net BRL delivered to Brazilian remote developers via instant PIX clearing, including 0.38% IOF tax and exchange rate markups.
+- [USD to MXN SPEI Contractor Payout Calculator](https://contractorfx.com/usd-to-mxn-spei-freelancer-payouts/): Calculates Mexican Pesos delivered via 24/7 SPEI interbank clearing, comparing Deel withdrawal fees against Wise and local bank spreads.
+- [PayPal Contractor FX Fee Calculator](https://contractorfx.com/paypal-contractor-fx-fee-calculator/): Exposes PayPal 4.4% commercial fee combined with hidden 3.5% to 4.5% foreign exchange markups against Wise and Payoneer rates.
+- [USD to CAD Contractor Payout Calculator](https://contractorfx.com/usd-to-cad-contractor-payout-calculator/): Compares Canadian EFT direct deposit against incoming bank wire fees ($15 to $25 CAD) and retail exchange rate markups.
+- [Contractor Payout Failure Reconciliation Guide](https://contractorfx.com/contractor-payout-fail-rate-reconciliation-guide/): Audits SWIFT correspondent bank intermediary lifting fees (OUR, BEN, SHA codes), return fees, and local clearing alternatives.
 
 ## Methodology, Privacy, and Governance
 

@@ -15,7 +15,7 @@ Read these four files in order at the start of every session before you change c
 - **Editorial contact.** `hello@contractorfx.com`.
 - **Workspace stage.** Formal independent product repository in `30_products/contractor-fx-comparator/`.
 - **Tech stack.** Astro 5 (`output: 'static'`, `trailingSlash: 'always'`, `build.format: 'directory'`), Tailwind CSS v4, TypeScript (`astro/tsconfigs/strict`), Vitest, Playwright, Node CLI (`bin/contractor-fx.mjs`), and Cloudflare Workers Static Assets (`wrangler.jsonc`).
-- **Fourteen content routes (11 calculator routes + 3 E-E-A-T trust routes).** Live `https://contractorfx.com/sitemap-index.xml` lists the same 14 URLs as the local sitemap, and all 14 return HTTP 200. `npm run release:check` exits 0 with `match`: live `release.json` records commit `10ca4e6dd2c9`, the same commit that was deployed. IndexNow was re-submitted on 2026-11-15 with all 14 URLs (HTTP 200).
+- **Twenty content routes (17 calculator routes + 3 E-E-A-T trust routes).**
 	- `/` (`dist/index.html`)
 	- `/wise-vs-payoneer-fee-calculator/` (`dist/wise-vs-payoneer-fee-calculator/index.html`)
 	- `/deel-vs-remote-contractor-calculator/` (`dist/deel-vs-remote-contractor-calculator/index.html`)
@@ -27,6 +27,12 @@ Read these four files in order at the start of every session before you change c
 	- `/wise-vs-payoneer-philippines/` (`dist/wise-vs-payoneer-philippines/index.html`)
 	- `/fiverr-payoneer-withdrawal-fee/` (`dist/fiverr-payoneer-withdrawal-fee/index.html`)
 	- `/upwork-withdrawal-fee-payoneer/` (`dist/upwork-withdrawal-fee-payoneer/index.html`)
+	- `/us-contractor-w8ben-tax-withholding-calculator/` (`dist/us-contractor-w8ben-tax-withholding-calculator/index.html`)
+	- `/usd-to-brl-pix-contractor-payout-guide/` (`dist/usd-to-brl-pix-contractor-payout-guide/index.html`)
+	- `/usd-to-mxn-spei-freelancer-payouts/` (`dist/usd-to-mxn-spei-freelancer-payouts/index.html`)
+	- `/paypal-contractor-fx-fee-calculator/` (`dist/paypal-contractor-fx-fee-calculator/index.html`)
+	- `/usd-to-cad-contractor-payout-calculator/` (`dist/usd-to-cad-contractor-payout-calculator/index.html`)
+	- `/contractor-payout-fail-rate-reconciliation-guide/` (`dist/contractor-payout-fail-rate-reconciliation-guide/index.html`)
 	- `/about/` (`dist/about/index.html`)
 	- `/privacy/` (`dist/privacy/index.html`)
 	- `/terms/` (`dist/terms/index.html`)

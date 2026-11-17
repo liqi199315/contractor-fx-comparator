@@ -11,6 +11,12 @@ const NEW_PATHS = [
 	'/wise-vs-payoneer-philippines/',
 	'/fiverr-payoneer-withdrawal-fee/',
 	'/upwork-withdrawal-fee-payoneer/',
+	'/us-contractor-w8ben-tax-withholding-calculator/',
+	'/usd-to-brl-pix-contractor-payout-guide/',
+	'/usd-to-mxn-spei-freelancer-payouts/',
+	'/paypal-contractor-fx-fee-calculator/',
+	'/usd-to-cad-contractor-payout-calculator/',
+	'/contractor-payout-fail-rate-reconciliation-guide/',
 ] as const;
 
 describe('long-tail route presets', () => {

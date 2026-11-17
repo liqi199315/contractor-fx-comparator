@@ -118,4 +118,6 @@ export interface FxRoutePreset {
 	relatedLinks?: RelatedCalculatorLink[];
 	marketplacePresetIds?: string[];
 	defaultMarketplacePresetId?: string;
+	corridorContextNote?: string;
+	clearingRailInfo?: string;
 }

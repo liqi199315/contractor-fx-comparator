@@ -146,6 +146,13 @@ function fmtMoney(value: number): string {
 				<p class="max-w-3xl text-sm leading-relaxed text-slate-600 tabular-nums">
 					On a {fmtMoney(preset.defaultInput.invoiceAmount)} {preset.defaultInput.billingCurrency} payout into {preset.defaultInput.payoutCurrency} (reference mid-rate 1 {preset.defaultInput.billingCurrency} = {scenarioSummary.midMarketRate} {preset.defaultInput.payoutCurrency}), headline transfer fees tell less than half the story. Total fee drag combines three separate cost layers.
 				</p>
+				{
+					preset.corridorContextNote && (
+						<p class="max-w-3xl text-sm leading-relaxed text-slate-700 font-medium pt-1">
+							{preset.corridorContextNote}
+						</p>
+					)
+				}
 			</div>
 
 			<div class="grid gap-4 md:grid-cols-3">
@@ -278,6 +285,16 @@ function fmtMoney(value: number): string {
 							Enter your live treasury desk or Reuters interbank spot quote into the Custom Mid-Rate Override field above to reconcile pre-settlement payouts to the cent.
 						</dd>
 					</div>
+					{
+						preset.clearingRailInfo && (
+							<div class="rounded-lg border border-emerald-200/80 bg-emerald-50/60 p-3.5 space-y-1">
+								<dt class="font-semibold text-emerald-950">Local Clearing Rail Architecture</dt>
+								<dd class="text-xs leading-relaxed text-emerald-900">
+									{preset.clearingRailInfo}
+								</dd>
+							</div>
+						)
+					}
 				</dl>
 			</div>
 		</section>

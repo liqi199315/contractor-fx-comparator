@@ -182,6 +182,42 @@ export const ROUTE_CARD_META: Readonly<Record<string, RouteCardMeta>> = {
 		comparisonFocus: 'Separates Upwork published withdrawal fees from the Payoneer dollar fee the help page does not state.',
 		spreadRangeNote: 'Local bank $0.99; Payoneer fee unpublished',
 	},
+	'/us-contractor-w8ben-tax-withholding-calculator/': {
+		corridorBadge: 'USD -> Multi | W-8BEN',
+		audienceTag: 'Tax & Compliance',
+		comparisonFocus: 'Models 0% foreign-source vs 30% backup withholding alongside multi-rail payout fee drag.',
+		spreadRangeNote: '0% with W-8BEN vs 30% missing',
+	},
+	'/usd-to-brl-pix-contractor-payout-guide/': {
+		corridorBadge: 'USD -> BRL | PIX',
+		audienceTag: 'Brazil Remote Devs',
+		comparisonFocus: 'Compares instant PIX settlement against international SWIFT wire intermediary and IOF tax loss.',
+		spreadRangeNote: '48 bps Wise PIX vs 260 bps SWIFT',
+	},
+	'/usd-to-mxn-spei-freelancer-payouts/': {
+		corridorBadge: 'USD -> MXN | SPEI',
+		audienceTag: 'Mexico Nearshoring',
+		comparisonFocus: 'Benchmarks Deel $5 withdrawal fee against Wise 0.45% and local SPEI bank delivery.',
+		spreadRangeNote: 'SPEI real-time clearing',
+	},
+	'/paypal-contractor-fx-fee-calculator/': {
+		corridorBadge: 'USD -> EUR | PayPal',
+		audienceTag: 'Freelance Invoices',
+		comparisonFocus: 'Exposes PayPal 4.4% commercial fee + 3.5% to 4.5% hidden currency spread against Wise.',
+		spreadRangeNote: '350 to 450 bps hidden FX markup',
+	},
+	'/usd-to-cad-contractor-payout-calculator/': {
+		corridorBadge: 'USD -> CAD | EFT',
+		audienceTag: 'Canada Remote Team',
+		comparisonFocus: 'Evaluates local Canadian EFT direct deposit against Canadian bank wire receiving fees.',
+		spreadRangeNote: 'EFT clearing vs bank wire',
+	},
+	'/contractor-payout-fail-rate-reconciliation-guide/': {
+		corridorBadge: 'SWIFT | Audit',
+		audienceTag: 'Treasury Ops',
+		comparisonFocus: 'Audits intermediary correspondent lifting fees (OUR, BEN, SHA) and wire return costs.',
+		spreadRangeNote: 'OUR / BEN / SHA fee reconciliation',
+	},
 };
 
 export const ROUTE_PRESETS: FxRoutePreset[] = [
@@ -234,6 +270,49 @@ export const ROUTE_PRESETS: FxRoutePreset[] = [
 					'Percentage FX spreads remain proportional to total monthly volume, so splitting $3,500 into two $1,750 transfers keeps FX spread dollars nearly identical. Fixed per-payout rail and SWIFT intermediary fees, however, multiply with each transfer event.',
 			},
 		],
+		workedExample: {
+			heading: 'Worked example: benchmarking a $3,500 USD to INR payout',
+			formula: 'effective_drag = funding_fee + fixed_rail_fee + (gross_usd * fx_spread)',
+			steps: [
+				'Assume a gross invoice amount of $3,500.00 USD funded via ACH debit.',
+				'Reference mid-market exchange rate is 1 USD = 84.50 INR ($3,500.00 = 295,750.00 INR gross equivalent).',
+				'Wise applies a 48 bps FX markup ($16.80 USD) plus a 0.43% ACH fee ($15.05 USD) with zero withdrawal fee, delivering 293,059.00 INR (effective fee drag: 0.91% or $31.85 USD).',
+				'Payoneer applies a 225 bps local bank withdrawal conversion margin ($78.75 USD) plus a 1.00% ACH credit fee ($35.00 USD), delivering 286,138.00 INR (effective fee drag: 3.25% or $113.75 USD).',
+				'Annual take-home difference on 12 consecutive monthly disbursements equals $982.80 USD.',
+			],
+		},
+		auditCallout:
+			'Always audit the combination of upfront ACH funding charges, fixed local withdrawal fees, and retail FX spread markups before choosing an ongoing payout rail.',
+		feeSources: [
+			{
+				publisher: 'Wise',
+				pageTitle: 'Wise Pricing to Send Money',
+				url: 'https://wise.com/us/pricing/send-money',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Wise converts at the live interbank midpoint with an explicit variable fee and transparent local rail clearing such as Indian IMPS or NEFT.',
+			},
+			{
+				publisher: 'Payoneer',
+				pageTitle: 'Payoneer Fees and Pricing',
+				url: 'https://www.payoneer.com/pricing/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Payoneer applies up to 3.00% above wholesale exchange rates when withdrawing USD balances to local currency bank accounts.',
+			},
+			{
+				publisher: 'Deel',
+				pageTitle: 'Deel Contractor Management Pricing',
+				url: 'https://www.deel.com/pricing/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Deel charges a $49 per active contractor monthly seat subscription alongside local bank transfer currency conversion markups.',
+			},
+		],
+		corridorContextNote:
+			'For USD to INR disbursements, Wise routes directly via IMPS and NEFT, while Payoneer converts balances into recipient Indian bank accounts under RBI auto-withdrawal guidelines.',
+		clearingRailInfo:
+			'Local Indian clearing (IMPS/NEFT) delivers funds within hours, whereas SWIFT wires trigger intermediary charges and require Nostro reconciliation.',
 	},
 	{
 		slug: 'wise-vs-payoneer-fee-calculator',
@@ -284,6 +363,40 @@ export const ROUTE_PRESETS: FxRoutePreset[] = [
 					'Holding USD defers conversion if the contractor spends directly in USD on business expenses. Once funds are withdrawn to a domestic non-USD bank account for living expenses, local FX conversion applies.',
 			},
 		],
+		workedExample: {
+			heading: 'Worked example: converting a $2,000 USD invoice to PHP',
+			formula: 'net_php = (gross_usd - funding_fee - fixed_withdrawal) * (mid_rate * (1 - fx_spread))',
+			steps: [
+				'Assume a $2,000.00 USD invoice converted to Philippine pesos at a mid-market rate of 1 USD = 58.70 PHP (gross mid value = 117,400.00 PHP).',
+				'Wise routes over InstaPay/PESONet with a 0.48% conversion spread ($9.60 USD) and ACH funding ($8.95 USD), delivering 116,310.00 PHP (total drag: $18.55 USD or 93 bps).',
+				'Payoneer virtual account ACH credit carries $20.00 USD (1.00%), and withdrawing USD balance to a Philippine bank carries a 2.25% conversion spread ($45.00 USD) plus $1.50 flat fee, delivering 113,500.00 PHP (total drag: $66.50 USD or 333 bps).',
+				'Monthly take-home retained by the contractor via mid-market routing equals $47.95 USD ($575.40 USD per year).',
+			],
+		},
+		auditCallout:
+			'Solo contractors withdrawing into local currency accounts absorb FX markups on every transfer; inspect both receiving account rules and local withdrawal schedules.',
+		feeSources: [
+			{
+				publisher: 'Wise',
+				pageTitle: 'Wise USD to PHP Transfer Pricing',
+				url: 'https://wise.com/us/pricing/send-money',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Wise quotes live peso delivery over InstaPay and PESONet at mid-market spot plus corridor variable fee with zero receiving charges.',
+			},
+			{
+				publisher: 'Payoneer',
+				pageTitle: 'Payoneer Pricing Schedule',
+				url: 'https://www.payoneer.com/pricing/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Payoneer applies a 2.0% to 3.0% currency conversion fee when transferring to local currency bank accounts in the Philippines.',
+			},
+		],
+		corridorContextNote:
+			'The Philippine corridor relies heavily on InstaPay (for real-time small amounts) and PESONet (for higher value transfers). Wise supports both rails directly.',
+		clearingRailInfo:
+			'InstaPay processes up to PHP 50,000 instantly, while PESONet handles same-day batches for larger compensation invoices.',
 	},
 	{
 		slug: 'deel-vs-remote-contractor-calculator',
@@ -334,6 +447,40 @@ export const ROUTE_PRESETS: FxRoutePreset[] = [
 					'Because seat subscriptions scale per active contractor while bulk ACH funding stays flat, total SaaS cost grows linearly with team size. Exporting the routing memo lets finance teams compare annual SaaS spend against internal AP automation.',
 			},
 		],
+		workedExample: {
+			heading: 'Worked example: 5-contractor team in Brazil ($4,500 USD per person)',
+			formula: 'team_annual_drag = ((monthly_seat_fee * count) + (gross_usd * fx_spread * count)) * 12',
+			steps: [
+				'Team volume equals 5 contractors * $4,500.00 USD = $22,500.00 USD monthly ($270,000.00 USD annually).',
+				'Deel contractor list pricing adds $49.00 USD per seat ($245.00 USD monthly) plus an estimated 1.50% contractor BRL conversion spread ($337.50 USD monthly), totaling $582.50 USD monthly.',
+				'Remote contractor list pricing adds $29.00 USD per seat ($145.00 USD monthly) plus an estimated 1.25% contractor BRL conversion spread ($281.25 USD monthly), totaling $426.25 USD monthly.',
+				'SaaS seat delta alone saves $1,200.00 USD per year on Remote, while combined seat and FX spread delta totals $1,875.00 USD per year.',
+			],
+		},
+		auditCallout:
+			'Contractor management platform seat subscriptions scale linearly with headcount; always contrast seat fees against contractor FX conversion loss.',
+		feeSources: [
+			{
+				publisher: 'Deel',
+				pageTitle: 'Deel Contractor Management Pricing',
+				url: 'https://www.deel.com/pricing/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Deel publishes $49 per contractor per month list price for onboarding, compliance agreements, and automated payments.',
+			},
+			{
+				publisher: 'Remote',
+				pageTitle: 'Remote Contractor Management Pricing',
+				url: 'https://remote.com/pricing',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Remote publishes $29 per contractor per month list price for international contractor management and payments.',
+			},
+		],
+		corridorContextNote:
+			'In Brazil, contractor payouts require PIX or TED rail delivery and compliance with IOF tax regulations. Remote and Deel provide localized contracts.',
+		clearingRailInfo:
+			'PIX settles 24/7 in real-time, whereas TED operates on banking business hours and requires tax identification (CPF/CNPJ).',
 	},
 	{
 		slug: 'deel-vs-wise-contractor-payouts',
@@ -384,6 +531,40 @@ export const ROUTE_PRESETS: FxRoutePreset[] = [
 					'USD/EUR is the deepest global FX pair with tight interbank liquidity and low-cost SEPA clearing. Even a 1.0% vs 0.4% spread difference on $40,000 monthly team volume still shifts $2,880 per year.',
 			},
 		],
+		workedExample: {
+			heading: 'Worked example: 8 engineering contractors paid $5,000 USD into EUR',
+			formula: 'annual_delta = (deel_annual_seats + deel_annual_fx_drag) - wise_annual_sepa_drag',
+			steps: [
+				'Monthly disbursement volume equals 8 contractors * $5,000.00 USD = $40,000.00 USD ($480,000.00 USD annually).',
+				'Deel charges $49.00 USD per contractor seat monthly ($392.00 USD / month or $4,704.00 USD / year) plus approximately 1.50% EUR withdrawal FX spread ($600.00 USD / month), totaling $992.00 USD / month ($11,904.00 USD / year).',
+				'Wise Business charges $0 monthly seat subscriptions and approximately 0.48% SEPA batch conversion spread plus ACH debit ($210.00 USD / month or $2,520.00 USD / year).',
+				'Net annual cash retained by executing direct SEPA batches through Wise Business equals $9,384.00 USD.',
+			],
+		},
+		auditCallout:
+			'If your company handles contractor tax forms and agreements internally, paying $49 per seat monthly introduces unnecessary overhead compared to direct bank batching.',
+		feeSources: [
+			{
+				publisher: 'Deel',
+				pageTitle: 'Deel Pricing Schedule',
+				url: 'https://www.deel.com/pricing/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Deel charges $49 per active contractor seat monthly for international contract administration and multi-currency payouts.',
+			},
+			{
+				publisher: 'Wise',
+				pageTitle: 'Wise Business Pricing',
+				url: 'https://wise.com/us/pricing/send-money',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Wise Business charges zero monthly seat subscriptions and executes multi-currency batch payouts at transparent mid-market spot rates.',
+			},
+		],
+		corridorContextNote:
+			'USD to EUR payouts clear seamlessly across the European SEPA network, making batch conversion spreads the primary cost differentiator.',
+		clearingRailInfo:
+			'SEPA Instant transfers clear in under 10 seconds across Eurozone financial institutions at negligible network cost.',
 	},
 	{
 		slug: 'deel-withdrawal-fee-calculator',
@@ -434,6 +615,40 @@ export const ROUTE_PRESETS: FxRoutePreset[] = [
 					'Consolidating withdrawals halves any fixed per-withdrawal rail or SWIFT fees, though percentage FX spreads apply to the total converted balance regardless of withdrawal count.',
 			},
 		],
+		workedExample: {
+			heading: 'Worked example: contractor withdrawing $3,000 USD to MXN',
+			formula: 'net_mxn = (gross_usd - withdrawal_fixed_fee) * (mid_rate * (1 - fx_spread))',
+			steps: [
+				'Assume a contractor has a $3,000.00 USD balance on Deel and withdraws to a Mexican bank account.',
+				'Reference mid-market exchange rate is 1 USD = 20.20 MXN (gross equivalent = 60,600.00 MXN).',
+				'Deel applies approximately 1.50% conversion spread ($45.00 USD) on standard local bank rails with zero fixed local fee, delivering 59,691.00 MXN (loss: 909.00 MXN or $45.00 USD).',
+				'Choosing cross-border SWIFT wire instead incurs a $5.00 USD platform fee plus $15.00 to $35.00 USD in intermediary correspondent deductions, plus local Mexican bank FX spreads of 2.50% to 3.50% ($75.00 to $105.00 USD).',
+			],
+		},
+		auditCallout:
+			'Always select local bank transfer over international wire whenever your domestic bank currency matches the target withdrawal currency to avoid correspondent bank deductions.',
+		feeSources: [
+			{
+				publisher: 'Deel Help',
+				pageTitle: 'Deel Withdrawal Fees by Method',
+				url: 'https://help.deel.com/hc/en-us/articles/4407737733009-How-Much-Does-It-Cost-To-Withdraw-Money-From-Deel',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Deel details withdrawal fees by method including local bank transfers, digital wallets, and international SWIFT wires.',
+			},
+			{
+				publisher: 'Banco de Mexico',
+				pageTitle: 'SPEI Payment System Information',
+				url: 'https://www.banxico.org.mx/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'SPEI enables real-time interbank electronic funds transfers within Mexico with low domestic transaction overhead.',
+			},
+		],
+		corridorContextNote:
+			'Mexican contractor cash-outs benefit directly from the SPEI network, allowing near-instant delivery into 18-digit CLABE bank accounts.',
+		clearingRailInfo:
+			'SPEI operates 24/7/365 with minute-level clearance; international SWIFT wires require manual bank intervention and currency conversion.',
 	},
 	{
 		slug: 'batch-contractor-payout-csv-audit',
@@ -484,6 +699,40 @@ export const ROUTE_PRESETS: FxRoutePreset[] = [
 					'Yes. Use the Single Invoice Calculator tab above the workbench to drill into funding rail options, custom mid-market rates, or downloadable Markdown routing memos for any individual corridor.',
 			},
 		],
+		workedExample: {
+			heading: 'Worked example: auditing a 6-contractor multi-currency payroll CSV',
+			formula: 'total_monthly_leakage = sum(current_provider_fee - optimal_provider_fee)',
+			steps: [
+				'Upload or paste a CSV roster containing 6 contractors across EUR, BRL, INR, and MXN totaling $30,000.00 USD in monthly payouts.',
+				'Current routing using traditional bank wires and default platforms results in $825.00 USD in monthly fee and FX spread drag.',
+				'Auditing each row against lowest-cost corridor rails identifies optimal routes (Wise for EUR/INR, Deel/Remote local rails for BRL/MXN), reducing monthly drag to $245.00 USD.',
+				'Net monthly savings equals $580.00 USD, projecting to $6,960.00 USD in annual cash retained with zero payroll roster data leaving your browser.',
+			],
+		},
+		auditCallout:
+			'All batch CSV parsing and savings computations execute 100% inside your browser memory; zero contractor names, salaries, or invoice records are uploaded over the network.',
+		feeSources: [
+			{
+				publisher: 'Wise Business',
+				pageTitle: 'Wise Multi-Currency Batch Payments',
+				url: 'https://wise.com/us/pricing/send-money',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Wise supports multi-currency batch CSV payouts at transparent mid-market spot rates with zero monthly platform seat charges.',
+			},
+			{
+				publisher: 'Deel',
+				pageTitle: 'Deel Contractor Management',
+				url: 'https://www.deel.com/pricing/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Deel charges $49 monthly per seat for multi-country contractor management and compliance automation.',
+			},
+		],
+		corridorContextNote:
+			'Multi-currency contractor rosters experience compounding drag when routed through single-provider rails; optimal routing matches local clearing rails by country.',
+		clearingRailInfo:
+			'Decoupling payments by local rail (SEPA for Europe, PIX for Brazil, SPEI for Mexico, IMPS for India) bypasses correspondent SWIFT lifting fees entirely.',
 	},
 	{
 		slug: 'fx-markup-calculator',
@@ -973,6 +1222,541 @@ export const ROUTE_PRESETS: FxRoutePreset[] = [
 					'Yes. Both pages use one marketplace-fee control. Fiverr presets fill $3.00 or $1.00 only where the help articles agree, and they leave the conflicting local-currency fee blank. Upwork presets fill $0.99 for local bank and leave Payoneer blank.',
 			},
 		],
+	},
+	{
+		slug: 'us-contractor-w8ben-tax-withholding-calculator',
+		path: '/us-contractor-w8ben-tax-withholding-calculator/',
+		navLabel: 'W-8BEN Withholding',
+		h1: 'US Contractor W-8BEN Tax Withholding Calculator and Non-Resident Compliance Guide',
+		seoTitle: 'W-8BEN Contractor Tax Withholding Calculator | Non-Resident Guide',
+		metaDescription:
+			'Calculate US contractor tax withholding with our W-8BEN calculator. Compare 0% foreign source vs 30% default withholding and contractor payout fees locally.',
+		primaryKeyword: 'w-8ben contractor tax withholding calculator',
+		heroSummary:
+			'Determine whether your international contractor payments require 0% or 30% US backup withholding. When non-resident alien independent contractors perform services entirely outside the United States, payments represent foreign-source income subject to 0% US tax withholding under IRS regulations once a valid Form W-8BEN is on file. Combine tax compliance rules with live FX fee comparisons across Wise, Deel, Remote, and bank wires.',
+		defaultInput: {
+			invoiceAmount: 4000,
+			billingCurrency: 'USD',
+			payoutCurrency: 'INR',
+			fundingMethod: 'ach-bank',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+		},
+		mode: 'calculator',
+		methodologyNotes: [
+			'Under Internal Revenue Code Section 861 and 862, independent contractor personal services are sourced where the physical work is performed. When work occurs outside the US, the income is foreign-source and not subject to US withholding.',
+			'Form W-8BEN certifies foreign status and beneficial ownership; without a signed form on file prior to payment, payers face 30% statutory withholding risk under Chapter 3 of the IRC.',
+			'Deel and Remote collect and validate Form W-8BEN during automated contractor onboarding; direct bank transfers via Wise require maintaining manual records in accounts payable.',
+			'All fee calculations benchmark the net after-tax disbursement across standard local payment rails.',
+		],
+		workedExample: {
+			heading: 'Worked example: $4,000 USD payment to a non-resident contractor in India',
+			formula:
+				'net_disbursement = gross_invoice - (gross_invoice * withholding_rate) - platform_fx_drag',
+			steps: [
+				'Gross invoice amount is $4,000.00 USD for software engineering services performed entirely in India.',
+				'With a valid Form W-8BEN certifying non-US tax residency and foreign-source service location, the applicable US withholding rate is 0.00% ($0.00 USD withheld).',
+				'If Form W-8BEN is missing or invalid, statutory backup withholding of 30.00% applies ($1,200.00 USD withheld, remitted to IRS via Form 1042-S).',
+				'On the compliant $4,000.00 USD net disbursement, routing via Wise mid-market rates incurs $35.40 USD total drag versus $130.00 USD via traditional wire markups.',
+			],
+		},
+		auditCallout:
+			'ContractorFX provides mathematical software models and educational information. Nothing on this page constitutes legal, tax, or accounting advice. Always consult a licensed CPA or tax attorney for cross-border withholding obligations.',
+		feeSources: [
+			{
+				publisher: 'Internal Revenue Service',
+				pageTitle: 'IRS Publication 515: Withholding of Tax on Nonresident Aliens',
+				url: 'https://www.irs.gov/publications/p515',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'IRS Publication 515 outlines withholding of tax on non-resident aliens and foreign entities, specifying that services performed outside the US are foreign-source income.',
+			},
+			{
+				publisher: 'Internal Revenue Service',
+				pageTitle: 'Instructions for Form W-8BEN',
+				url: 'https://www.irs.gov/instructions/iw8ben',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Form W-8BEN establishes foreign status and beneficial ownership of the payee to document exemption from 30% US tax withholding.',
+			},
+		],
+		relatedLinks: [
+			{ href: '/payoneer-fees-calculator-india/', label: 'Payoneer India fee calculator and INR auto-withdrawal' },
+			{ href: '/deel-vs-wise-contractor-payouts/', label: 'Deel vs Wise contractor payouts: compliance vs direct rails' },
+		],
+		faqs: [
+			{
+				question: 'Do non-US independent contractors have to pay US taxes?',
+				answer:
+					'Generally no. When a non-resident alien independent contractor performs all services outside the United States, the compensation is classified as foreign-source income. As long as a valid Form W-8BEN is on file certifying their non-US status, the US client is not required to withhold federal taxes.',
+			},
+			{
+				question: 'What happens if a US company does not collect Form W-8BEN before paying an overseas contractor?',
+				answer:
+					'If an IRS audit occurs and the payer cannot document foreign status with a valid Form W-8BEN, the payer may be held personally liable for the 30% statutory withholding tax plus penalties and interest under IRC Section 1461.',
+			},
+			{
+				question: 'Does Form W-8BEN expire?',
+				answer:
+					'Form W-8BEN remains valid starting on the signature date and ending on the last day of the third succeeding calendar year (typically three years), unless a change in circumstances makes any information on the form incorrect.',
+			},
+			{
+				question: 'Do platforms like Deel or Remote automatically generate Form 1099 or Form 1042-S?',
+				answer:
+					'Foreign contractors who complete Form W-8BEN do not receive a Form 1099-NEC. If payments represent foreign-source income with 0% withholding, Form 1042-S filing is generally not required for independent personal services.',
+			},
+		],
+		corridorContextNote:
+			'W-8BEN compliance guarantees zero US tax withholding on foreign-source contractor invoices, allowing 100% of gross funds to convert over optimal local clearing rails.',
+		clearingRailInfo:
+			'Compliant payouts settle directly over domestic clearing rails (IMPS in India, PIX in Brazil, SPEI in Mexico) with zero IRS withholding deductions.',
+	},
+	{
+		slug: 'usd-to-brl-pix-contractor-payout-guide',
+		path: '/usd-to-brl-pix-contractor-payout-guide/',
+		navLabel: 'USD to BRL (PIX)',
+		h1: 'USD to BRL Contractor Payout Guide and PIX Settlement Fee Calculator',
+		seoTitle: 'USD to BRL Contractor Payout Guide | PIX vs Wire Fee Calculator',
+		metaDescription:
+			'Benchmark USD to BRL contractor payouts over PIX and TED rails. Compare IOF tax, Wise mid-market rates, Deel, Remote, and traditional bank spreads locally.',
+		primaryKeyword: 'usd to brl contractor payout',
+		heroSummary:
+			'Benchmark net take-home pay for Brazilian remote contractors receiving USD invoices settled into Brazilian Reais (BRL). Compare instant PIX clearing and TED bank transfers against international SWIFT wires, factoring in Brazilian IOF tax (0.38% standard on inbound transfers) and hidden retail exchange rate markups across Wise, Deel, Remote, and traditional banks.',
+		defaultInput: {
+			invoiceAmount: 4500,
+			billingCurrency: 'USD',
+			payoutCurrency: 'BRL',
+			fundingMethod: 'ach-bank',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+		},
+		mode: 'calculator',
+		methodologyNotes: [
+			'Brazilian Central Bank regulations require foreign exchange contracts (cambio) for incoming remittances, applying IOF tax (Imposto sobre Operacoes Financeiras) of 0.38% on standard business export services.',
+			'PIX delivers funds 24/7/365 in seconds using the recipient CPF (individual) or CNPJ (business entity) key, replacing legacy TED and DOC transfers.',
+			'Brazilian contractors operating as PJ (Pessoa Juridica) issue an NFS-e (Nota Fiscal de Servicos Eletronica) and pay domestic taxes under Simples Nacional or Lucro Presumido.',
+			'Wise converts at mid-market spot pricing and settles directly over the domestic PIX rail with transparent spreads.',
+		],
+		workedExample: {
+			heading: 'Worked example: $4,500 USD invoice converted to Brazilian Reais (BRL)',
+			formula:
+				'net_brl = (gross_usd - funding_fee) * (1 - iof_rate) * (mid_rate * (1 - fx_spread))',
+			steps: [
+				'Gross invoice is $4,500.00 USD. Reference interbank mid-rate is 1 USD = 5.75 BRL (gross equivalent = 25,875.00 BRL).',
+				'Inbound foreign exchange into Brazil incurs 0.38% IOF tax ($17.10 USD equivalent).',
+				'Wise delivers via PIX within seconds at a 0.48% conversion spread ($21.60 USD) and ACH funding ($19.70 USD), delivering 25,602.00 BRL.',
+				'Traditional SWIFT wire incurs $35.00 outgoing wire fee, $15.00 intermediary bank fee, plus 2.60% Brazilian bank retail spread, delivering 24,520.00 BRL (loss of 1,082.00 BRL or $188.00 USD).',
+			],
+		},
+		auditCallout:
+			'Brazilian contractors operating as PJ (Pessoa Juridica) must issue a municipal NFS-e (Nota Fiscal de Servicos Eletronica) and account for Simples Nacional or Lucro Presumido taxes.',
+		feeSources: [
+			{
+				publisher: 'Banco Central do Brasil',
+				pageTitle: 'Regulamentacao do Sistema de Pagamentos Instantaneos (PIX)',
+				url: 'https://www.bcb.gov.br/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Banco Central do Brasil establishes rules for PIX instant settlements, foreign exchange transaction registration, and reporting.',
+			},
+			{
+				publisher: 'Wise',
+				pageTitle: 'Wise USD to BRL Transfer Pricing',
+				url: 'https://wise.com/us/pricing/send-money',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Wise quotes transparent fees and mid-market rates for BRL payouts delivered via the domestic PIX rail.',
+			},
+		],
+		relatedLinks: [
+			{ href: '/deel-vs-remote-contractor-calculator/', label: 'Deel vs Remote 5-contractor BRL team benchmark' },
+			{ href: '/fx-markup-calculator/', label: 'Calculate exact BRL exchange rate markup in bps' },
+		],
+		faqs: [
+			{
+				question: 'How fast do Brazilian contractors receive USD payments sent via PIX?',
+				answer:
+					'When the sender uses a platform integrated with local Brazilian clearing (such as Wise), funds settle into the contractor bank account via PIX within seconds once currency conversion is executed.',
+			},
+			{
+				question: 'What is IOF tax on international contractor payments into Brazil?',
+				answer:
+					'IOF (Imposto sobre Operacoes Financeiras) is a federal tax levied by the Brazilian government on FX operations. For inbound payments representing exported services from a foreign client, the standard IOF rate is 0.38%.',
+			},
+			{
+				question: 'Should Brazilian remote developers register as PJ or receive as an individual (PF)?',
+				answer:
+					'Receiving foreign compensation as an individual (Pessoa Fisica) can trigger progressive income tax rates up to 27.5% under Carne-Leao. Most full-time Brazilian remote workers form a legal entity (PJ) under the Simples Nacional regime to lower effective tax rates to between 6% and 15%.',
+			},
+			{
+				question: 'Can Brazilian contractors hold a USD balance directly in Brazil?',
+				answer:
+					'Recent Brazilian foreign exchange framework modernization allows domestic banks to offer foreign currency accounts under specific conditions, but daily living expenses require converting to Reais (BRL) via domestic clearing.',
+			},
+		],
+		corridorContextNote:
+			'The Brazil corridor is defined by PIX instant clearance, municipal NFS-e invoicing, and federal 0.38% IOF tax on inbound service exports.',
+		clearingRailInfo:
+			'PIX functions 24 hours a day, 7 days a week, settling interbank BRL transfers in under 10 seconds without intermediary correspondent bank fees.',
+	},
+	{
+		slug: 'usd-to-mxn-spei-freelancer-payouts',
+		path: '/usd-to-mxn-spei-freelancer-payouts/',
+		navLabel: 'USD to MXN (SPEI)',
+		h1: 'USD to MXN Contractor Payout Calculator and SPEI Transfer Benchmark',
+		seoTitle: 'USD to MXN Contractor Payout Calculator | SPEI Transfer Fees',
+		metaDescription:
+			'Calculate USD to MXN contractor payouts over SPEI rails. Compare Deel $5 withdrawal fee, Wise mid-market rates, Payoneer, and Mexican bank retail spreads.',
+		primaryKeyword: 'usd to mxn contractor payout',
+		heroSummary:
+			'Calculate net Mexican Pesos (MXN) delivered on USD contractor invoices routed through Mexico SPEI (Sistema de Pagos Electronicos Interbancarios) instant clearing rail. Compare platform withdrawal charges from Deel ($5.00 USD non-ACH withdrawal fee), Wise transparent variable pricing, Payoneer conversion bands, and traditional bank correspondent deductions.',
+		defaultInput: {
+			invoiceAmount: 3000,
+			billingCurrency: 'USD',
+			payoutCurrency: 'MXN',
+			fundingMethod: 'ach-bank',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+		},
+		mode: 'calculator',
+		methodologyNotes: [
+			'SPEI is Mexico national interbank clearing rail operated by Banco de Mexico, executing Mexican Peso electronic transfers 24/7 across 18-digit CLABE account numbers.',
+			'Mexican contractors registered under the SAT RESICO regime (Regimen Simplificado de Confianza) pay reduced income tax rates (1.0% to 2.5%) on exported services when issuing compliant CFDI invoices with 0% VAT.',
+			'Deel applies a $5.00 USD non-ACH fixed fee on bank withdrawals alongside retail conversion markups.',
+			'Wise converts at mid-market spot and deposits directly to recipient Mexican bank accounts via SPEI within minutes.',
+		],
+		workedExample: {
+			heading: 'Worked example: $3,000 USD contractor invoice delivered via SPEI',
+			formula:
+				'net_mxn = (gross_usd - platform_fees) * (mid_rate * (1 - fx_spread))',
+			steps: [
+				'Gross invoice is $3,000.00 USD. Reference interbank mid-rate is 1 USD = 20.20 MXN (gross value = 60,600.00 MXN).',
+				'Wise converts at mid-market spot with a 0.48% spread ($14.40 USD) and ACH funding ($13.25 USD), routing over SPEI directly into recipient Mexican CLABE bank account, delivering 59,980.00 MXN.',
+				'Deel applies approximately 1.50% conversion spread ($45.00 USD) on local bank withdrawal, delivering 59,691.00 MXN.',
+				'Payoneer applies a 2.25% conversion spread ($67.50 USD) plus a 1.00% ACH credit fee ($30.00 USD), delivering 58,630.00 MXN.',
+			],
+		},
+		auditCallout:
+			'Mexican contractors under the RESICO tax regime benefit from reduced income tax rates (1% to 2.5%) on exported services when verified with compliant CFDI invoices and wire documentation.',
+		feeSources: [
+			{
+				publisher: 'Banco de Mexico',
+				pageTitle: 'Sistema de Pagos Electronicos Interbancarios (SPEI)',
+				url: 'https://www.banxico.org.mx/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'SPEI facilitates real-time interbank electronic funds transfers within Mexico with low domestic transaction overhead.',
+			},
+			{
+				publisher: 'SAT Mexico',
+				pageTitle: 'Regimen Simplificado de Confianza (RESICO)',
+				url: 'https://www.sat.gob.mx/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Servicio de Administracion Tributaria rules for exporting digital services under the RESICO tax regime with 0% VAT rate.',
+			},
+		],
+		relatedLinks: [
+			{ href: '/deel-withdrawal-fee-calculator/', label: 'Deel withdrawal fee calculator for MXN cash-outs' },
+			{ href: '/fx-markup-calculator/', label: 'Measure exact MXN exchange rate markup in bps' },
+		],
+		faqs: [
+			{
+				question: 'How do Mexican contractors receive international USD payments via SPEI?',
+				answer:
+					'Payout platforms with Mexican clearing integrations convert USD to MXN at their prevailing exchange rate and dispatch the Mexican Pesos over SPEI using the contractor 18-digit CLABE number, typically completing in under five minutes.',
+			},
+			{
+				question: 'Do Mexican contractors charge VAT (IVA) to US or international clients?',
+				answer:
+					'Under Mexican VAT Law (Ley del IVA) Article 29, the export of independent personal services utilized entirely abroad is zero-rated (0% IVA), meaning Mexican contractors do not add 16% VAT to international invoices.',
+			},
+			{
+				question: 'Why should Mexican contractors avoid international SWIFT wires into domestic USD accounts?',
+				answer:
+					'Unless you hold an authorized border-zone commercial account, Mexican banks convert incoming USD wires into MXN at retail bank counter rates that carry wide spreads (2.5% to 4.0%), in addition to charging $15 to $30 USD in incoming wire fees.',
+			},
+			{
+				question: 'What is an 18-digit CLABE number in Mexico?',
+				answer:
+					'CLABE (Clave Bancaria Estandarizada) is the standard 18-digit bank account identifier in Mexico used to route SPEI payments. It encodes the bank code (3 digits), branch code (3 digits), account number (11 digits), and a check digit (1 digit).',
+			},
+		],
+		corridorContextNote:
+			'Mexico nearshoring relies on the SPEI 24/7 instant clearing rail and CFDI 4.0 invoicing with 0% export VAT under the SAT RESICO regime.',
+		clearingRailInfo:
+			'SPEI transfers clear in real time across all Mexican banks when addressed with a valid 18-digit CLABE number.',
+	},
+	{
+		slug: 'paypal-contractor-fx-fee-calculator',
+		path: '/paypal-contractor-fx-fee-calculator/',
+		navLabel: 'PayPal FX Fees',
+		h1: 'PayPal Contractor FX Fee Calculator and Hidden Currency Markup Benchmark',
+		seoTitle: 'PayPal Contractor FX Fee Calculator | Hidden Exchange Rate Spread',
+		metaDescription:
+			'Uncover hidden FX markups in PayPal contractor payouts. Compare PayPal 3.5% to 4.5% conversion spreads and commercial fees against Wise and Payoneer rates.',
+		primaryKeyword: 'paypal contractor fx fee calculator',
+		heroSummary:
+			'Measure the true cost of using PayPal for international contractor invoices. In addition to commercial receiving fees of 3.49% to 4.40% plus fixed charges, PayPal embeds an exchange rate markup between 3.50% and 4.50% above the wholesale interbank rate whenever balance is withdrawn into local non-USD bank accounts. Benchmark total fee drag against Wise mid-market rates and Payoneer.',
+		defaultInput: {
+			invoiceAmount: 2500,
+			billingCurrency: 'USD',
+			payoutCurrency: 'EUR',
+			fundingMethod: 'ach-bank',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+		},
+		mode: 'calculator',
+		methodologyNotes: [
+			'PayPal user agreements state that a currency conversion spread of 3.0% to 4.5% is added above the wholesale interbank rate for cross-currency transfers and local bank withdrawals.',
+			'Commercial transactions from international buyers incur a 4.40% receiving fee plus a fixed currency charge, compounding with the conversion spread.',
+			'Wise charges mid-market exchange rates with an upfront variable fee (typically 0.40% to 0.50% on major currencies).',
+			'This calculator separates upfront merchant receiving fees from downstream currency conversion drag to reveal full transaction cost.',
+		],
+		workedExample: {
+			heading: 'Worked example: $2,500 USD invoice paid via PayPal versus Wise',
+			formula:
+				'paypal_drag = (gross_usd * commercial_rate + fixed_fee) + (net_usd * fx_spread)',
+			steps: [
+				'Assume an international client sends $2,500.00 USD to a freelance developer in Europe (mid-market rate 1 USD = 0.9200 EUR, gross value = 2,300.00 EUR).',
+				'PayPal commercial receiving fee is 4.40% + $0.49 USD = $110.49 USD, leaving a USD balance of $2,389.51 USD.',
+				'Withdrawing that balance to a European EUR bank triggers PayPal currency conversion spread of approximately 4.00% ($95.58 USD FX loss), delivering 2,110.40 EUR (total fee drag: $189.60 USD or 7.58%).',
+				'Wise Business ACH invoice payment incurs 0.48% conversion spread ($12.00 USD) and ACH funding ($11.10 USD), delivering 2,278.70 EUR (total fee drag: $23.10 USD or 0.92%).',
+				'The contractor retains an additional 168.30 EUR ($166.50 USD) on a single invoice by skipping PayPal conversion.',
+			],
+		},
+		auditCallout:
+			'PayPal currency conversion markups are among the highest in fintech; international contractors should maintain USD balances or route via mid-market platforms like Wise to avoid 4% spread deductions.',
+		feeSources: [
+			{
+				publisher: 'PayPal',
+				pageTitle: 'PayPal Merchant Fees Schedule',
+				url: 'https://www.paypal.com/us/webapps/mpp/merchant-fees',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'PayPal commercial transaction fees for receiving domestic and international payments range from 3.49% to 4.40% plus fixed currency fees.',
+			},
+			{
+				publisher: 'PayPal Legal',
+				pageTitle: 'PayPal User Agreement Currency Conversion',
+				url: 'https://www.paypal.com/us/legalhub/useragreement-full',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'PayPal adds a currency conversion spread of 3.0% to 4.5% above wholesale interbank exchange rates depending on transaction type.',
+			},
+		],
+		relatedLinks: [
+			{ href: '/fx-markup-calculator/', label: 'Measure the exact hidden spread in any PayPal exchange rate' },
+			{ href: '/wise-vs-payoneer-fee-calculator/', label: 'Wise vs Payoneer fee comparison for cross-border invoices' },
+		],
+		faqs: [
+			{
+				question: 'Why does PayPal charge both a transaction fee and an exchange rate fee?',
+				answer:
+					'PayPal treats payment processing and currency conversion as two separate revenue centers. The commercial transaction fee (up to 4.40%) covers payment gateway processing, while the 3.5% to 4.5% exchange rate markup is deducted when converting currencies.',
+			},
+			{
+				question: 'Can international freelancers withdraw USD directly from PayPal to a local bank account?',
+				answer:
+					'In most countries, PayPal automatically forces conversion to the local bank national currency at PayPal internal exchange rate. Direct USD withdrawals to non-US bank accounts are either prohibited or subject to high fixed fees.',
+			},
+			{
+				question: 'How do Wise and Payoneer compare to PayPal on a $2,500 USD invoice?',
+				answer:
+					'On a $2,500 invoice, PayPal fee drag often exceeds $175 to $200 USD (7% to 8%). Payoneer total drag is typically around $60 to $85 USD (2.5% to 3.4%), while Wise mid-market transfers total approximately $20 to $30 USD (under 1.2%).',
+			},
+			{
+				question: 'Is PayPal Friends and Family an option for international contractor payments?',
+				answer:
+					'No. Paying contractors via Friends and Family violates PayPal Terms of Service for commercial work, eliminates buyer/seller protection, and fails to generate the required accounting and tax records for corporate audit trails.',
+			},
+		],
+		corridorContextNote:
+			'PayPal combines a 4.40% cross-border commercial receiving fee with an additional 3.5% to 4.5% retail exchange spread on bank cash-outs.',
+		clearingRailInfo:
+			'Modern alternatives route domestic clearing directly into local IBANs, saving up to 6% in combined payment processing and conversion markups.',
+	},
+	{
+		slug: 'usd-to-cad-contractor-payout-calculator',
+		path: '/usd-to-cad-contractor-payout-calculator/',
+		navLabel: 'USD to CAD (EFT)',
+		h1: 'USD to CAD Contractor Payout Calculator and Cross-Border EFT Fee Audit',
+		seoTitle: 'USD to CAD Contractor Payout Calculator | Cross-Border EFT Fees',
+		metaDescription:
+			'Compare USD to CAD contractor payouts over local EFT rails. Benchmark Canadian bank wire fees, retail FX markups, Wise, Deel, and Remote side by side.',
+		primaryKeyword: 'usd to cad contractor payout',
+		heroSummary:
+			'Benchmark net Canadian Dollars (CAD) received by Canadian remote workers on USD invoices. Compare Canadian bank (RBC, TD, BMO, Scotiabank, CIBC) incoming wire fees ($15.00 to $25.00 CAD) and retail currency markups (2.0% to 3.0%) against automated local EFT clearing via Wise Business, Deel, and Remote.',
+		defaultInput: {
+			invoiceAmount: 5000,
+			billingCurrency: 'USD',
+			payoutCurrency: 'CAD',
+			fundingMethod: 'ach-bank',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+		},
+		mode: 'calculator',
+		methodologyNotes: [
+			'Cross-border payments between the US and Canada can clear via SWIFT wire or domestic Canadian EFT (Electronic Funds Transfer) direct deposit through Payments Canada ACSS system.',
+			'Major Canadian chartered banks charge $15 to $25 CAD incoming wire fees plus a 2.0% to 3.0% retail exchange spread on USD funds converted to CAD.',
+			'Canadian sole proprietors providing services to non-resident US clients treat export services as zero-rated under CRA GST/HST rules.',
+			'Wise converts at the interbank mid-market rate and deposits funds directly via local Canadian EFT within one business day.',
+		],
+		workedExample: {
+			heading: 'Worked example: $5,000 USD contractor invoice delivered into Canadian Dollars',
+			formula:
+				'net_cad = (gross_usd - funding_fee) * (mid_rate * (1 - fx_spread)) - bank_receiving_fee',
+			steps: [
+				'Gross invoice is $5,000.00 USD. Reference interbank mid-rate is 1 USD = 1.3800 CAD (gross equivalent = 6,900.00 CAD).',
+				'Wise converts at mid-market spot with a 0.48% spread ($24.00 USD) and ACH funding ($21.85 USD), clearing via local Canadian EFT direct deposit, delivering 6,836.70 CAD (effective drag: 63.30 CAD or 0.92%).',
+				'Sending via SWIFT bank wire incurs $35.00 USD sender fee, $15.00 CAD recipient bank incoming wire fee, plus 2.50% Canadian bank retail FX markup ($125.00 USD), delivering 6,530.00 CAD (loss of 370.00 CAD or $268.00 USD).',
+			],
+		},
+		auditCallout:
+			'Canadian sole proprietors providing services to non-resident clients should treat export services as zero-rated under CRA GST/HST rules, meaning 0% tax is charged but input tax credits can be claimed.',
+		feeSources: [
+			{
+				publisher: 'Payments Canada',
+				pageTitle: 'Automated Clearing Settlement System (ACSS) Rules',
+				url: 'https://www.payments.ca/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Payments Canada governs the ACSS system and clearing standards for direct deposit EFT transactions across Canadian financial institutions.',
+			},
+			{
+				publisher: 'Wise',
+				pageTitle: 'Wise USD to CAD Transfer Pricing',
+				url: 'https://wise.com/us/pricing/send-money',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Wise provides transparent mid-market exchange rates and local Canadian EFT delivery without recipient incoming wire charges.',
+			},
+		],
+		relatedLinks: [
+			{ href: '/deel-vs-wise-contractor-payouts/', label: 'Deel vs Wise contractor payouts: comparing SaaS vs direct rails' },
+			{ href: '/fx-markup-calculator/', label: 'Measure the exact CAD exchange rate spread in bps' },
+		],
+		faqs: [
+			{
+				question: 'How do Canadian banks handle incoming international US dollar wires?',
+				answer:
+					'If deposited into a standard CAD chequing account, the Canadian bank converts the USD at its retail foreign exchange spread (typically 2.0% to 3.0% below the mid-market rate) and deducts an incoming wire fee of $15 to $25 CAD.',
+			},
+			{
+				question: 'Can Canadian contractors hold a USD account in Canada to avoid conversion?',
+				answer:
+					'Yes. Most Canadian banks offer USD-denominated accounts based in Canada. While this avoids automatic currency conversion, incoming international wire fees still apply, and moving funds from the USD account to a CAD account later will incur the bank retail conversion spread.',
+			},
+			{
+				question: 'Do Canadian independent contractors need to charge GST/HST to US clients?',
+				answer:
+					'Under Canada Revenue Agency (CRA) guidelines, services provided to a non-resident individual or company are generally zero-rated for GST/HST purposes (0% tax rate), provided the service is performed for business purposes outside Canada.',
+			},
+			{
+				question: 'What information does an employer need to send funds via Canadian EFT?',
+				answer:
+					'To deliver via local Canadian EFT, the sender requires the contractor 3-digit institution number, 5-digit transit (branch) number, and account number (7 to 12 digits), which can be found on a void cheque.',
+			},
+		],
+		corridorContextNote:
+			'The US to Canada corridor leverages domestic EFT clearing to bypass Canadian chartered bank international wire charges and retail FX spreads.',
+		clearingRailInfo:
+			'Canadian EFT direct deposit routes through Payments Canada ACSS, settling within 1 business day without intermediary deductions.',
+	},
+	{
+		slug: 'contractor-payout-fail-rate-reconciliation-guide',
+		path: '/contractor-payout-fail-rate-reconciliation-guide/',
+		navLabel: 'Wire Fail & Reconciliation',
+		h1: 'Contractor Payout Failure Reconciliation Guide and SWIFT Intermediary Fee Audit',
+		seoTitle: 'Contractor Payout Failure Reconciliation Guide | SWIFT Wire Audit',
+		metaDescription:
+			'Troubleshoot failed international contractor wires and missing funds. Audit SWIFT intermediary bank lifting fees (OUR, BEN, SHA) and local clearing rails.',
+		primaryKeyword: 'contractor payment rejected swift intermediary fees',
+		heroSummary:
+			'Diagnose and resolve missing funds, intermediary deductions, and rejected cross-border contractor wires. When sending international SWIFT bank transfers, intermediary correspondent banks deduct $15.00 to $50.00 in lifting fees depending on charge codes (OUR, BEN, SHA), while slight name mismatches or incorrect IBAN checksums cause costly returns. Benchmark SWIFT wire failure points against modern local clearing rails.',
+		defaultInput: {
+			invoiceAmount: 3500,
+			billingCurrency: 'USD',
+			payoutCurrency: 'EUR',
+			fundingMethod: 'wire',
+			contractorCount: 1,
+			payoutsPerMonth: 1,
+			feeBearer: 'contractor',
+		},
+		mode: 'calculator',
+		methodologyNotes: [
+			'SWIFT MT103 Field 71A defines charge allocation: OUR (sender pays all fees), BEN (beneficiary pays all fees), or SHA (shared, sender pays outgoing fee and beneficiary absorbs intermediary deductions).',
+			'Correspondent banking networks route wires through one or more intermediary banks before reaching the beneficiary institution, each potentially deducting lifting fees.',
+			'International wire returns incur reverse intermediary fees ($25 to $50 USD) and double-conversion foreign exchange losses.',
+			'Modern payout networks replace correspondent SWIFT hops with pre-funded local clearing accounts in each recipient jurisdiction.',
+		],
+		workedExample: {
+			heading: 'Worked example: reconciling an international wire with intermediary deductions',
+			formula:
+				'net_received = gross_sent - sender_bank_fee - correspondent_lifting_fee - recipient_fx_markup',
+			steps: [
+				'Sender dispatches $3,500.00 USD via SWIFT under the standard SHA (shared) charge code, paying a $30.00 USD initiation fee.',
+				'The payment routes through two intermediary correspondent banks, which deduct $20.00 USD and $15.00 USD in transit lifting charges, reducing the principal to $3,465.00 USD.',
+				'The recipient local bank in Europe rejects the wire because the beneficiary name on the invoice was a trade name instead of the contractor personal legal name.',
+				'The wire is returned minus an additional $35.00 return processing fee and converted back at unfavorable retail bid/ask rates, generating an unrecoverable loss of $100.00+ USD and a 10-day delay.',
+				'Routing over Wise or Deel local rails guarantees exact recipient net delivery with upfront IBAN/account validation.',
+			],
+		},
+		auditCallout:
+			'Always verify recipient beneficiary legal name matching and local clearing codes (ACH routing, UK sort code, Indian IFSC, Mexican CLABE) to avoid SWIFT intermediary rejections.',
+		feeSources: [
+			{
+				publisher: 'SWIFT Standards',
+				pageTitle: 'SWIFT MT103 Field 71A Charge Details',
+				url: 'https://www.swift.com/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'SWIFT documentation defines Field 71A charge allocation codes (OUR, BEN, SHA) governing correspondent bank lifting fee deductions.',
+			},
+			{
+				publisher: 'Federal Reserve',
+				pageTitle: 'Foreign Remittance Transfer Disclosures and Protections',
+				url: 'https://www.federalreserve.gov/',
+				verifiedOn: FEE_SOURCE_VERIFIED_ON,
+				finding:
+					'Federal guidelines under the Dodd-Frank Act require disclosure of third-party fees and exchange rates for consumer international transfers.',
+			},
+		],
+		relatedLinks: [
+			{ href: '/fx-markup-calculator/', label: 'Measure the hidden FX markup in bank and wire transactions' },
+			{ href: '/batch-contractor-payout-csv-audit/', label: 'Audit your full contractor team roster for wire fee leakage' },
+		],
+		faqs: [
+			{
+				question: 'What is the difference between OUR, BEN, and SHA in an international bank wire?',
+				answer:
+					'OUR means the sender pays all fees including intermediary charges. BEN means the recipient absorbs all sender, intermediary, and receiving charges. SHA (shared) means the sender pays outgoing bank fees, while intermediary correspondent deductions are subtracted from the transfer amount before delivery.',
+			},
+			{
+				question: 'Why did my contractor receive $30 less than the nominal invoice amount?',
+				answer:
+					'Under the common SHA wire instruction, intermediary correspondent banks in the SWIFT path deduct lifting fees (typically $15 to $35 USD) directly from the principal in transit before the funds reach the destination bank.',
+			},
+			{
+				question: 'What are the most common reasons an international contractor wire gets rejected?',
+				answer:
+					'The leading causes of wire rejection are: (1) beneficiary name mismatch (trade/business name vs personal legal bank account name), (2) incorrect IBAN or routing checksum, (3) missing intermediary/correspondent BIC code, and (4) local currency mismatches.',
+			},
+			{
+				question: 'How do modern contractor platforms prevent intermediary wire losses?',
+				answer:
+					'Platforms like Wise, Deel, and Remote avoid SWIFT correspondent chains by maintaining pre-funded local bank accounts in dozens of countries. The payment clears through domestic ACH, SEPA, PIX, or SPEI rails, delivering exact net totals with zero intermediary lifting deductions.',
+			},
+		],
+		corridorContextNote:
+			'International SWIFT wire failures are driven by intermediary correspondent bank lifting deductions (Field 71A) and beneficiary account naming mismatches.',
+		clearingRailInfo:
+			'Migrating from SWIFT correspondent networks to domestic pre-funded clearing rails eliminates transit deductions and guarantees exact net invoice delivery.',
 	},
 ];
 
