@@ -271,4 +271,54 @@ Kavita Sharma,5100,USD,INR,payoneer`;
 		const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
 		expect(scrollWidth).toBeLessThanOrEqual(375);
 	});
+
+	test('debounces rapid input events by 250ms and flushes immediately before memo export or sample load', async ({
+		page,
+	}) => {
+		await page.goto('/');
+
+		const winnerBanner = page.getByTestId('winner-banner');
+		const initialWinnerText = await winnerBanner.innerText();
+		const invoiceAmountInput = page.getByTestId('invoice-amount-input');
+
+		await invoiceAmountInput.evaluate((el: HTMLInputElement) => {
+			el.value = '7777';
+			el.dispatchEvent(new Event('input', { bubbles: true }));
+		});
+
+		expect(await winnerBanner.innerText()).toBe(initialWinnerText);
+
+		const downloadPromise = page.waitForEvent('download');
+		await page.getByTestId('download-memo-md-btn').click();
+		const download = await downloadPromise;
+
+		await expect(winnerBanner).not.toHaveText(initialWinnerText);
+
+		const stream = await download.createReadStream();
+		expect(stream).not.toBeNull();
+		const chunks: Buffer[] = [];
+		for await (const chunk of stream!) {
+			chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+		}
+		const exportedMd = Buffer.concat(chunks).toString('utf8');
+		expect(exportedMd).toContain('7,777.00');
+
+		await page.getByTestId('tab-csv').click();
+		const csvInput = page.getByTestId('csv-input');
+		const statusBanner = page.getByTestId('csv-status-banner');
+		await csvInput.evaluate((el: HTMLTextAreaElement) => {
+			el.value = 'broken,csv';
+			el.dispatchEvent(new Event('input', { bubbles: true }));
+		});
+
+		expect(await statusBanner.getAttribute('data-status')).toBe('ok');
+		await expect(statusBanner).toHaveAttribute('data-status', 'error');
+
+		await csvInput.evaluate((el: HTMLTextAreaElement) => {
+			el.value = 'still,broken';
+			el.dispatchEvent(new Event('input', { bubbles: true }));
+		});
+		await page.getByTestId('load-sample-csv-btn').click();
+		await expect(statusBanner).toHaveAttribute('data-status', 'ok');
+	});
 });
