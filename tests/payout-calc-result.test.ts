@@ -2,8 +2,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { trackToolEvent } from '../src/lib/analytics';
 import {
 	PAYOUT_CALC_RESULT_EVENT,
-	isSuccessfulComparisonResult,
-	payoutCalcResultParams,
 	trackPayoutCalcResultOnce,
 } from '../src/lib/payout-calc-result';
 import type { ComparisonSummary, PayoutScenarioInput } from '../src/lib/types';
@@ -35,24 +33,19 @@ describe('payout_calc_result', () => {
 		trackToolEventMock.mockClear();
 	});
 
-	it('treats a positive invoice with provider quotes as a successful comparison', () => {
-		expect(isSuccessfulComparisonResult(input(), summary(5))).toBe(true);
-		expect(payoutCalcResultParams(input(), summary(5))).toEqual({
-			route_count: 5,
-			payout: 'PHP',
-		});
-	});
+	it.each([0, Number.NaN, Number.POSITIVE_INFINITY, -20])(
+		'does not send an event for invoice amount %s',
+		(invoiceAmount) => {
+			expect(trackPayoutCalcResultOnce(false, true, input({ invoiceAmount }), summary())).toBe(
+				false,
+			);
+			expect(trackToolEventMock).not.toHaveBeenCalled();
+		},
+	);
 
-	it('does not treat a zero, blank, or non-numeric invoice as a result', () => {
-		expect(isSuccessfulComparisonResult(input({ invoiceAmount: 0 }), summary())).toBe(false);
-		expect(isSuccessfulComparisonResult(input({ invoiceAmount: Number.NaN }), summary())).toBe(
-			false,
-		);
-		expect(
-			isSuccessfulComparisonResult(input({ invoiceAmount: Number.POSITIVE_INFINITY }), summary()),
-		).toBe(false);
-		expect(isSuccessfulComparisonResult(input({ invoiceAmount: -20 }), summary())).toBe(false);
-		expect(isSuccessfulComparisonResult(input(), summary(0))).toBe(false);
+	it('does not send an event when there are no provider quotes', () => {
+		expect(trackPayoutCalcResultOnce(false, true, input(), summary(0))).toBe(false);
+		expect(trackToolEventMock).not.toHaveBeenCalled();
 	});
 
 	it('does not send the prefilled page-load comparison before the user interacts', () => {
@@ -112,9 +105,9 @@ describe('payout_calc_result', () => {
 	});
 
 	it('does not put the invoice amount or any other user text in the event params', () => {
-		trackPayoutCalcResultOnce(false, true, input({ invoiceAmount: 12345.67 }), summary(5));
+		trackPayoutCalcResultOnce(false, true, input({ invoiceAmount: 12345.67 }), summary(3));
 		const params = trackToolEventMock.mock.calls[0]?.[1] ?? {};
-		expect(params).toEqual({ route_count: 5, payout: 'PHP' });
+		expect(params).toEqual({ route_count: 3, payout: 'PHP' });
 		expect(JSON.stringify(params)).not.toContain('12345.67');
 	});
 });
