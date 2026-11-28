@@ -171,7 +171,7 @@ function readGitSource(cwd) {
 			ahead = Number.parseInt(aheadText, 10) || 0;
 		}
 	}
-	const statusRes = runGit(toplevel, ['status', '--porcelain']);
+	const statusRes = runGit(toplevel, ['-c', 'core.quotePath=false', 'status', '--porcelain']);
 	if (statusRes.status !== 0) {
 		throw new Error('git status failed');
 	}
