@@ -3,11 +3,6 @@ import type { ComparisonSummary, PayoutScenarioInput } from './types';
 
 export const PAYOUT_CALC_RESULT_EVENT = 'payout_calc_result';
 
-export type PayoutCalcResultParams = {
-	route_count: number;
-	payout: string;
-};
-
 /**
  * A comparison is a result only when the invoice amount is a positive finite
  * number and the engine returned at least one provider quote. Zero, blank,
@@ -22,16 +17,6 @@ export function isSuccessfulComparisonResult(
 		input.invoiceAmount > 0 &&
 		summary.quotes.length > 0
 	);
-}
-
-export function payoutCalcResultParams(
-	input: Pick<PayoutScenarioInput, 'payoutCurrency'>,
-	summary: Pick<ComparisonSummary, 'quotes'>,
-): PayoutCalcResultParams {
-	return {
-		route_count: summary.quotes.length,
-		payout: input.payoutCurrency,
-	};
 }
 
 /**
@@ -50,6 +35,9 @@ export function trackPayoutCalcResultOnce(
 	if (alreadySent || !userInteracted || !isSuccessfulComparisonResult(input, summary)) {
 		return alreadySent;
 	}
-	trackToolEvent(PAYOUT_CALC_RESULT_EVENT, payoutCalcResultParams(input, summary));
+	trackToolEvent(PAYOUT_CALC_RESULT_EVENT, {
+		route_count: summary.quotes.length,
+		payout: input.payoutCurrency,
+	});
 	return true;
 }
