@@ -769,6 +769,7 @@ const providerLabels: Record<string, string> = {
 
 <script>
 	import { trackToolEvent } from '../lib/analytics';
+	import { createDebouncedController } from '../lib/debounce';
 	import {
 		auditContractorCsv,
 		comparePayoutProviders,
@@ -784,6 +785,8 @@ const providerLabels: Record<string, string> = {
 		PayoutCurrency,
 		PayoutScenarioInput,
 	} from '../lib/types';
+
+	const INPUT_DEBOUNCE_MS = 250;
 
 	const PROVIDER_NAMES: Record<string, string> = {
 		wise: 'Wise Business',
@@ -881,9 +884,6 @@ const providerLabels: Record<string, string> = {
 			tabCalc.className = isCalc ? TAB_ACTIVE_CLASS : TAB_IDLE_CLASS;
 			tabCsv.className = !isCalc ? TAB_ACTIVE_CLASS : TAB_IDLE_CLASS;
 		}
-
-		tabCalc?.addEventListener('click', () => setMode('calculator'));
-		tabCsv?.addEventListener('click', () => setMode('csv-batch'));
 
 		function readCurrentInput(): { input: PayoutScenarioInput; customMidRate?: number } {
 			const rawAmount = Number(amountInput?.value ?? 0);
@@ -1097,25 +1097,7 @@ const providerLabels: Record<string, string> = {
 			}
 		}
 
-		for (const pill of corridorPills) {
-			pill.addEventListener('click', () => {
-				if (amountInput && pill.dataset.amount) amountInput.value = pill.dataset.amount;
-				if (billingSelect && pill.dataset.billing) billingSelect.value = pill.dataset.billing;
-				if (payoutSelect && pill.dataset.payout) payoutSelect.value = pill.dataset.payout;
-				if (fundingSelect && pill.dataset.funding) fundingSelect.value = pill.dataset.funding;
-				if (contractorInput && pill.dataset.contractors) contractorInput.value = pill.dataset.contractors;
-				if (payoutsInput && pill.dataset.payouts) payoutsInput.value = pill.dataset.payouts;
-				if (feeBearerSelect && pill.dataset.feeBearer) feeBearerSelect.value = pill.dataset.feeBearer;
-				if (customMidRateInput) customMidRateInput.value = '';
-
-				calculatorInteractionPending = true;
-				renderCalculator();
-				trackToolEvent('corridor_changed', {
-					billing: latestInput.billingCurrency,
-					payout: latestInput.payoutCurrency,
-				});
-			});
-		}
+		let pendingMarketplaceNoteSync = false;
 
 		function applyMarketplacePreset(): void {
 			if (!marketplacePresetSelect || !marketplaceFeeInput) return;
@@ -1132,14 +1114,9 @@ const providerLabels: Record<string, string> = {
 			}
 		}
 
-		marketplacePresetSelect?.addEventListener('change', () => {
-			applyMarketplacePreset();
-			calculatorInteractionPending = true;
-			renderCalculator();
-		});
-
-		marketplaceFeeInput?.addEventListener('input', () => {
-			if (marketplaceNote && marketplaceFeeInput.value.trim().length > 0) {
+		function syncMarketplaceFeeNoteFromInput(): void {
+			if (!marketplaceFeeInput || !marketplaceNote) return;
+			if (marketplaceFeeInput.value.trim().length > 0) {
 				const option = marketplacePresetSelect?.selectedOptions[0];
 				const presetNote = option?.dataset.note ?? '';
 				const typed = marketplaceFeeInput.value.trim();
@@ -1150,63 +1127,14 @@ const providerLabels: Record<string, string> = {
 				marketplaceNote.dataset.marketplaceStatus = 'applied';
 				marketplaceNote.className =
 					'rounded-lg border px-3 py-2 text-xs leading-relaxed border-slate-200 bg-white text-slate-700';
-			} else if (marketplaceNote && marketplacePresetSelect) {
+			} else if (marketplacePresetSelect) {
 				const option = marketplacePresetSelect.selectedOptions[0];
 				marketplaceNote.textContent = option?.dataset.note ?? '';
 				marketplaceNote.dataset.marketplaceStatus = 'unpublished';
 				marketplaceNote.className =
 					'rounded-lg border px-3 py-2 text-xs leading-relaxed border-amber-300 bg-amber-50 text-amber-950';
 			}
-			calculatorInteractionPending = true;
-			renderCalculator();
-		});
-
-		const calcControls = [
-			amountInput,
-			billingSelect,
-			payoutSelect,
-			fundingSelect,
-			contractorInput,
-			payoutsInput,
-			feeBearerSelect,
-			customMidRateInput,
-		];
-
-		const renderCalculatorFromUserInput = (): void => {
-			calculatorInteractionPending = true;
-			renderCalculator();
-		};
-
-		for (const control of calcControls) {
-			control?.addEventListener('input', renderCalculatorFromUserInput);
-			control?.addEventListener('change', renderCalculatorFromUserInput);
 		}
-
-		const handleCorridorSelectChange = (): void => {
-			trackToolEvent('corridor_changed', {
-				billing: latestInput.billingCurrency,
-				payout: latestInput.payoutCurrency,
-			});
-		};
-
-		billingSelect?.addEventListener('change', handleCorridorSelectChange);
-		payoutSelect?.addEventListener('change', handleCorridorSelectChange);
-
-		downloadMdBtn?.addEventListener('click', () => {
-			renderCalculator();
-			const content = exportComparisonReport(latestInput, latestSummary, 'md');
-			const filename = `contractor-payout-memo-${latestInput.billingCurrency.toLowerCase()}-${latestInput.payoutCurrency.toLowerCase()}.md`;
-			triggerBlobDownload(content, filename, 'text/markdown;charset=utf-8');
-			trackToolEvent('payout_calc_export', { format: 'md' });
-		});
-
-		downloadCsvBtn?.addEventListener('click', () => {
-			renderCalculator();
-			const content = exportComparisonReport(latestInput, latestSummary, 'csv');
-			const filename = `contractor-payout-comparison-${latestInput.billingCurrency.toLowerCase()}-${latestInput.payoutCurrency.toLowerCase()}.csv`;
-			triggerBlobDownload(content, filename, 'text/csv;charset=utf-8');
-			trackToolEvent('payout_calc_export', { format: 'csv' });
-		});
 
 		let lastTrackedCsvSignature = SAMPLE_TEAM_CSV.trim();
 
@@ -1276,9 +1204,160 @@ const providerLabels: Record<string, string> = {
 			}
 		}
 
+		const renderCalculatorFromUserInput = (): void => {
+			if (pendingMarketplaceNoteSync) {
+				pendingMarketplaceNoteSync = false;
+				syncMarketplaceFeeNoteFromInput();
+			}
+			calculatorInteractionPending = true;
+			renderCalculator();
+		};
+
+		const calcDebouncer = createDebouncedController(
+			renderCalculatorFromUserInput,
+			INPUT_DEBOUNCE_MS,
+		);
+		const csvDebouncer = createDebouncedController(() => {
+			if (csvTextarea) {
+				renderCsvAudit(csvTextarea.value, false);
+			}
+		}, INPUT_DEBOUNCE_MS);
+
+		function flushPendingUpdates(): void {
+			calcDebouncer.flush();
+			csvDebouncer.flush();
+		}
+
+		tabCalc?.addEventListener('click', () => {
+			flushPendingUpdates();
+			setMode('calculator');
+		});
+		tabCsv?.addEventListener('click', () => {
+			flushPendingUpdates();
+			setMode('csv-batch');
+		});
+
+		for (const pill of corridorPills) {
+			pill.addEventListener('click', () => {
+				calcDebouncer.cancel();
+				pendingMarketplaceNoteSync = false;
+				csvDebouncer.flush();
+
+				if (amountInput && pill.dataset.amount) amountInput.value = pill.dataset.amount;
+				if (billingSelect && pill.dataset.billing) billingSelect.value = pill.dataset.billing;
+				if (payoutSelect && pill.dataset.payout) payoutSelect.value = pill.dataset.payout;
+				if (fundingSelect && pill.dataset.funding) fundingSelect.value = pill.dataset.funding;
+				if (contractorInput && pill.dataset.contractors) contractorInput.value = pill.dataset.contractors;
+				if (payoutsInput && pill.dataset.payouts) payoutsInput.value = pill.dataset.payouts;
+				if (feeBearerSelect && pill.dataset.feeBearer) feeBearerSelect.value = pill.dataset.feeBearer;
+				if (customMidRateInput) customMidRateInput.value = '';
+
+				calculatorInteractionPending = true;
+				renderCalculator();
+				trackToolEvent('corridor_changed', {
+					billing: latestInput.billingCurrency,
+					payout: latestInput.payoutCurrency,
+				});
+			});
+		}
+
+		marketplacePresetSelect?.addEventListener('change', () => {
+			calcDebouncer.cancel();
+			pendingMarketplaceNoteSync = false;
+			csvDebouncer.flush();
+			applyMarketplacePreset();
+			calculatorInteractionPending = true;
+			renderCalculator();
+		});
+
+		marketplaceFeeInput?.addEventListener('input', () => {
+			pendingMarketplaceNoteSync = true;
+			calculatorInteractionPending = true;
+			calcDebouncer.schedule();
+		});
+
+		marketplaceFeeInput?.addEventListener('change', () => {
+			if (!calcDebouncer.flush()) {
+				syncMarketplaceFeeNoteFromInput();
+				calculatorInteractionPending = true;
+				renderCalculator();
+			}
+		});
+
+		const calcTextInputs = [
+			amountInput,
+			contractorInput,
+			payoutsInput,
+			customMidRateInput,
+		];
+
+		for (const control of calcTextInputs) {
+			control?.addEventListener('input', () => {
+				calculatorInteractionPending = true;
+				calcDebouncer.schedule();
+			});
+			control?.addEventListener('change', () => {
+				if (!calcDebouncer.flush()) {
+					renderCalculatorFromUserInput();
+				}
+			});
+		}
+
+		const calcSelectControls = [
+			billingSelect,
+			payoutSelect,
+			fundingSelect,
+			feeBearerSelect,
+		];
+
+		for (const selectControl of calcSelectControls) {
+			selectControl?.addEventListener('change', () => {
+				calcDebouncer.cancel();
+				csvDebouncer.flush();
+				renderCalculatorFromUserInput();
+			});
+		}
+
+		const handleCorridorSelectChange = (): void => {
+			trackToolEvent('corridor_changed', {
+				billing: latestInput.billingCurrency,
+				payout: latestInput.payoutCurrency,
+			});
+		};
+
+		billingSelect?.addEventListener('change', handleCorridorSelectChange);
+		payoutSelect?.addEventListener('change', handleCorridorSelectChange);
+
+		downloadMdBtn?.addEventListener('click', () => {
+			const flushedCalc = calcDebouncer.flush();
+			csvDebouncer.flush();
+			if (!flushedCalc) {
+				renderCalculator();
+			}
+			const content = exportComparisonReport(latestInput, latestSummary, 'md');
+			const filename = `contractor-payout-memo-${latestInput.billingCurrency.toLowerCase()}-${latestInput.payoutCurrency.toLowerCase()}.md`;
+			triggerBlobDownload(content, filename, 'text/markdown;charset=utf-8');
+			trackToolEvent('payout_calc_export', { format: 'md' });
+		});
+
+		downloadCsvBtn?.addEventListener('click', () => {
+			const flushedCalc = calcDebouncer.flush();
+			csvDebouncer.flush();
+			if (!flushedCalc) {
+				renderCalculator();
+			}
+			const content = exportComparisonReport(latestInput, latestSummary, 'csv');
+			const filename = `contractor-payout-comparison-${latestInput.billingCurrency.toLowerCase()}-${latestInput.payoutCurrency.toLowerCase()}.csv`;
+			triggerBlobDownload(content, filename, 'text/csv;charset=utf-8');
+			trackToolEvent('payout_calc_export', { format: 'csv' });
+		});
+
 		async function ingestCsvFile(file: File | undefined): Promise<void> {
 			if (!file) return;
+			csvDebouncer.cancel();
+			calcDebouncer.flush();
 			const text = await file.text();
+			csvDebouncer.cancel();
 			if (csvTextarea) {
 				csvTextarea.value = text;
 			}
@@ -1286,7 +1365,11 @@ const providerLabels: Record<string, string> = {
 		}
 
 		csvTextarea?.addEventListener('input', () => {
-			renderCsvAudit(csvTextarea.value, false);
+			csvDebouncer.schedule();
+		});
+
+		csvTextarea?.addEventListener('change', () => {
+			csvDebouncer.flush();
 		});
 
 		csvFileUpload?.addEventListener('change', async () => {
@@ -1326,6 +1409,8 @@ const providerLabels: Record<string, string> = {
 		}
 
 		loadSampleBtn?.addEventListener('click', () => {
+			csvDebouncer.cancel();
+			calcDebouncer.flush();
 			if (csvTextarea) {
 				csvTextarea.value = SAMPLE_TEAM_CSV;
 			}

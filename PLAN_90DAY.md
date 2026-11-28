@@ -143,6 +143,7 @@
 | P0-4 | 基于 `P0-3` 提供的公开统计配置，跑通 `npm run ga4:report`、`npm run gsc:report`、`npm run bing:report` 首轮连通性检查并记录新站零基线（依赖 P0-2、P0-3） | `[AI]` | `已完成（2026-11-12）` |
 | P0-5 | 复核 9 个路由的 `<title>`、`<meta name="description">`、`og:image` 与 `<h1>` 关键词覆盖，上线后锁定 28 天观察窗口（至 2026-12-10 前不重复改标题） | `[AI]` | `已完成（2026-11-12）` |
 | P0-6 | 在 `NOW.md` 记录迁入 `30_products/` 正式仓、90 天试验窗口与首周等待人工清单 | `[AI]` | `已完成（2026-11-12）` |
+| P0-7 | 为 `FxComparatorWorkbench.astro` 数值/文本与批量 CSV 输入补齐 `250ms` 防抖与导出/切页/下拉即时 `flush()`，新增 `.github/workflows/ci.yml` PR CI 门禁与 `scripts/release-manifest.mjs` 独立构建回退 | `[AI]` | `已完成（2026-11-17）` |
 
 **Phase 0 验收**：本地 `npm run verify:all` 全绿；主假设一句话锁死；线上 `https://contractorfx.com` 部署与搜索控制台提交完成（或未完成项已明确列在等待人工清单中）。
 
